@@ -56,7 +56,7 @@ function App(): JSX.Element {
 	return (
 		<Container sx={{ p: 4 }}>
 			<Typography variant="h5" textAlign={"center"}>
-				Music Downloader <Typography>By C4STII</Typography>
+				Music Downloader <Typography>By C4STI</Typography>
 			</Typography>
 			<Grid container spacing={4} sx={{ mt: 1, mb: 2 }}>
 				<Grid item xs={5}>
@@ -67,11 +67,11 @@ function App(): JSX.Element {
 						<InputLabel id="demo-simple-select-label">Type</InputLabel>
 						<Select
 							labelId="demo-simple-select-label"
-							value={0}
+							value={Object.entries(TrackType)[0][0]}
 							label="Type"
 							onChange={() => {}}>
 							{Object.entries(TrackType).map(([key, value]) => (
-								<MenuItem value={key}>{value}</MenuItem>
+								<MenuItem key={key} value={key}>{value}</MenuItem>
 							))}
 						</Select>
 					</FormControl>
