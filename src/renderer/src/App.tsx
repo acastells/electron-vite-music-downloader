@@ -1,145 +1,167 @@
-import Versions from './components/Versions'
-import icons from './assets/icons.svg'
+import {
+  Button,
+  ButtonGroup,
+  Container,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React from "react";
+import { Track, TrackStatus, TrackType } from "./vm";
+
+import ClearAllIcon from "@mui/icons-material/ClearAll";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DoneIcon from "@mui/icons-material/Done";
+import DownloadIcon from "@mui/icons-material/Download";
+import HideSourceIcon from "@mui/icons-material/HideSource";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ReplayIcon from "@mui/icons-material/Replay";
+import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
+import WarningIcon from "@mui/icons-material/Warning";
+import LinearProgress from "@mui/material/LinearProgress";
 
 function App(): JSX.Element {
-  return (
-    <div className="container">
-      <Versions></Versions>
+	const [tracks, setTracks] = React.useState<Track[]>([]);
 
-      <svg className="hero-logo" viewBox="0 0 900 300">
-        <use xlinkHref={`${icons}#electron`} />
-      </svg>
-      <h2 className="hero-text">
-        You{"'"}ve successfully created an Electron project with React and TypeScript
-      </h2>
-      <p className="hero-tagline">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
+	React.useEffect(() => {
+		setTracks([
+			...tracks,
+			{
+				id: Date.now(),
+				name: "Bangarang",
+				path: "/Desktop/",
+				type: TrackType.ByName,
+				length: 330,
+				progress: 50,
+				similarity: 25,
+				completed: false,
+				status: TrackStatus.Pending,
+				msg: "",
+			},
+		]);
+	}, []);
 
-      <div className="links">
-        <div className="link-item">
-          <a target="_blank" href="https://electron-vite.org" rel="noopener noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="link-item link-dot">•</div>
-        <div className="link-item">
-          <a
-            target="_blank"
-            href="https://github.com/alex8088/electron-vite"
-            rel="noopener noreferrer"
-          >
-            Getting Help
-          </a>
-        </div>
-        <div className="link-item link-dot">•</div>
-        <div className="link-item">
-          <a
-            target="_blank"
-            href="https://github.com/alex8088/quick-start/tree/master/packages/create-electron"
-            rel="noopener noreferrer"
-          >
-            create-electron
-          </a>
-        </div>
-      </div>
+	return (
+		<Container sx={{ p: 4 }}>
+			<Typography variant="h5" textAlign={"center"}>
+				Music Downloader <Typography>By C4STII</Typography>
+			</Typography>
+			<Grid container spacing={4} sx={{ mt: 1, mb: 2 }}>
+				<Grid item xs={5}>
+					<TextField fullWidth variant="outlined" label="Track or URL"></TextField>
+				</Grid>
+				<Grid item xs={2}>
+					<FormControl fullWidth>
+						<InputLabel id="demo-simple-select-label">Type</InputLabel>
+						<Select
+							labelId="demo-simple-select-label"
+							value={0}
+							label="Type"
+							onChange={() => {}}>
+							{Object.entries(TrackType).map(([key, value]) => (
+								<MenuItem value={key}>{value}</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				</Grid>
+				<Grid
+					item
+					xs={2}
+					justifyContent={"center"}
+					alignItems={"center"}
+					flexDirection={"row"}>
+					<Button fullWidth variant="outlined">
+						<DownloadIcon />
+					</Button>
+				</Grid>
+				<Grid
+					item
+					xs={3}
+					flexDirection={"row"}
+					justifyContent="center"
+					alignItems={"center"}>
+					<ButtonGroup fullWidth>
+						<Button>
+							<SystemUpdateIcon /> FFMPEG
+						</Button>
+						<Button>
+							<SystemUpdateIcon /> DLP
+						</Button>
+					</ButtonGroup>
+					<ButtonGroup fullWidth>
+						<Button>
+							<ClearAllIcon /> <DoneIcon />
+						</Button>
+						<Button>
+							<ClearAllIcon /> <WarningIcon />
+						</Button>
+						<Button>
+							<ClearAllIcon />{" "}
+						</Button>
+					</ButtonGroup>
+				</Grid>
+			</Grid>
 
-      <div className="features">
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Configuring</h2>
-            <p className="detail">
-              Config with <span>electron.vite.config.ts</span> and refer to the{' '}
-              <a target="_blank" href="https://electron-vite.org/config" rel="noopener noreferrer">
-                config guide
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">HMR</h2>
-            <p className="detail">
-              Edit <span>src/renderer</span> files to test HMR. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/hmr.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Hot Reloading</h2>
-            <p className="detail">
-              Run{' '}
-              <span>
-                {"'"}electron-vite dev --watch{"'"}
-              </span>{' '}
-              to enable. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/hot-reloading.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Debugging</h2>
-            <p className="detail">
-              Check out <span>.vscode/launch.json</span>. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/debugging.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Source Code Protection</h2>
-            <p className="detail">
-              Supported via built-in plugin <span>bytecodePlugin</span>. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/source-code-protection.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Packaging</h2>
-            <p className="detail">
-              Use{' '}
-              <a target="_blank" href="https://www.electron.build" rel="noopener noreferrer">
-                electron-builder
-              </a>{' '}
-              and pre-configured to pack your app.
-            </p>
-          </article>
-        </div>
-      </div>
-    </div>
-  )
+			<TableContainer component={Paper}>
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableCell>Name</TableCell>
+							<TableCell>Type</TableCell>
+							<TableCell>Progress</TableCell>
+							<TableCell>Length</TableCell>
+							<TableCell>Similarity</TableCell>
+							<TableCell>Status</TableCell>
+							<TableCell>Actions</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{tracks.map((track) => (
+							<TableRow key={track.id}>
+								<TableCell>{track.name}</TableCell>
+								<TableCell>{track.type}</TableCell>
+								<TableCell>
+									<LinearProgress
+										variant="determinate"
+										value={50}></LinearProgress>
+								</TableCell>
+								<TableCell>{track.length}</TableCell>
+								<TableCell>{track.similarity}</TableCell>
+								<TableCell>{track.status}</TableCell>
+								<TableCell>
+									<Button color="success">
+										<PlayArrowIcon />
+									</Button>
+									<Button>
+										<HideSourceIcon />
+									</Button>
+									<Button color="warning">
+										<DeleteIcon />
+										<ReplayIcon />
+									</Button>
+									<Button color="error">
+										<DeleteForeverIcon />
+									</Button>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</Container>
+	);
 }
 
-export default App
+export default App;
