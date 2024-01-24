@@ -1,8 +1,8 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { BrowserWindow, app, ipcMain, shell } from "electron";
-import path, { join } from "path";
+import { BrowserWindow, app, shell } from "electron";
+import { join } from "path";
 import icon from "../../resources/icon.png?asset";
-const fs = require("fs");
+import { setupFFmpeg } from "./setupFfmpeg";
 
 function createWindow(): void {
 	// Create the browser window.
@@ -51,6 +51,7 @@ app.whenReady().then(() => {
 	});
 
 	createWindow();
+	setupFFmpeg();
 
 	app.on("activate", function () {
 		// On macOS it's common to re-create a window in the app when the
@@ -67,67 +68,3 @@ app.on("window-all-closed", () => {
 		app.quit();
 	}
 });
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
-app.whenReady().then(() => {
-	ipcMain.on("download_ffmpeg", downloadFfmpeg);
-	ipcMain.on("download_dlp", () => {});
-	ipcMain.on("clear_success", () => {});
-	ipcMain.on("clear_warning", () => {});
-	ipcMain.on("clear_all", () => {});
-	ipcMain.on("download", () => {});
-});
-
-let ffmpegDownloadOptions = {
-	zipPath: path.join(app.getPath("appData"), "Music Downloader", "ffmpeg.zip"),
-	folderPath: path.join(app.getPath("appData"), "Music Downloader", "ffmpeg"),
-	binPath: path.join(
-		app.getPath("appData"),
-		"Music Downloader",
-		"ffmpeg",
-		"ffmpeg-master-latest-win64-lgpl-shared",
-		"bin",
-		"ffmpeg.exe"
-	),
-	onStarted: () => {},
-	onCompleted: () => {},
-};
-
-const downloadFfmpeg = async (_event: Electron.IpcMainEvent, ..._args: any[]) => {
-	const zipPathExists = fs.existsSync(ffmpegDownloadOptions.zipPath);
-	const binPathExists = fs.existsSync(ffmpegDownloadOptions.binPath);
-
-	if (zipPathExists && binPathExists) {
-		console.log("ffmpeg exists and is unzipped, no operation...");
-	} else if (zipPathExists && !binPathExists) {
-		console.log("ffmpeg zip exists, unzipping...");
-		unzipFfmpeg();
-	} else {
-		try {
-			const url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest";
-			const finalUrl = `${url}/ffmpeg-master-latest-win64-lgpl-shared.zip`;
-			const win = BrowserWindow.getFocusedWindow();
-			ffmpegDownloadOptions.onStarted = () => {};
-			ffmpegDownloadOptions.onCompleted = unzipFfmpeg;
-			const { download } = require("electron-dl");
-			download(win, finalUrl, ffmpegDownloadOptions);
-		} catch (error) {
-			console.error(error);
-		}
-	}
-};
-
-const unzipFfmpeg = () => {
-	const { createReadStream } = require("fs");
-	const unzipper = require("unzipper");
-
-	createReadStream(ffmpegDownloadOptions.zipPath)
-		.pipe(unzipper.Extract({ path: ffmpegDownloadOptions.folderPath }))
-		.on("finish", () => {
-			console.log("Unzipped successfully!");
-		})
-		.on("error", (err) => {
-			console.error("Error while unzipping:", err);
-		});
-};
