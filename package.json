@@ -29,7 +29,9 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.6",
     "@mui/material": "^5.15.6",
-    "electron-updater": "^6.1.7"
+    "electron-dl": "^3.5.1",
+    "electron-updater": "^6.1.7",
+    "unzipper": "^0.10.14"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",

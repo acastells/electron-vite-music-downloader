@@ -93,7 +93,7 @@ function App(): JSX.Element {
 					justifyContent="center"
 					alignItems={"center"}>
 					<ButtonGroup fullWidth>
-						<Button>
+						<Button onClick={() => window.api.send("download_ffmpeg")}>
 							<SystemUpdateIcon /> FFMPEG
 						</Button>
 						<Button>
