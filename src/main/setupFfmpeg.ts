@@ -1,6 +1,9 @@
 import { BrowserWindow, app, ipcMain } from "electron";
 import path from "path";
 const fs = require("fs");
+const decompress = require("decompress");
+
+export const versionFFmpeg = "ffmpeg-master-latest-win64-lgpl-shared";
 
 export const setupFFmpeg = () => {
 	app.whenReady().then(() => {
@@ -8,13 +11,15 @@ export const setupFFmpeg = () => {
 	});
 
 	let ffmpegDownloadOptions = {
+		filename: "ffmpeg.zip",
+		directory: path.join(app.getPath("appData"), "Music Downloader"),
 		zipPath: path.join(app.getPath("appData"), "Music Downloader", "ffmpeg.zip"),
 		folderPath: path.join(app.getPath("appData"), "Music Downloader", "ffmpeg"),
 		binPath: path.join(
 			app.getPath("appData"),
 			"Music Downloader",
 			"ffmpeg",
-			"ffmpeg-master-latest-win64-lgpl-shared",
+			versionFFmpeg,
 			"bin",
 			"ffmpeg.exe"
 		),
@@ -27,14 +32,14 @@ export const setupFFmpeg = () => {
 		const binPathExists = fs.existsSync(ffmpegDownloadOptions.binPath);
 
 		if (zipPathExists && binPathExists) {
-			console.log("ffmpeg exists and is unzipped, no operation...");
+			console.log("ffmpeg.exists and is unzipped, no operation...");
 		} else if (zipPathExists && !binPathExists) {
-			console.log("ffmpeg zip exists, unzipping...");
+			console.log("ffmpeg.zip exists, unzipping...");
 			unzipFfmpeg();
 		} else {
 			try {
 				const url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest";
-				const finalUrl = `${url}/ffmpeg-master-latest-win64-lgpl-shared.zip`;
+				const finalUrl = `${url}/${versionFFmpeg}`;
 				const win = BrowserWindow.getFocusedWindow();
 				ffmpegDownloadOptions.onStarted = () => {};
 				ffmpegDownloadOptions.onCompleted = unzipFfmpeg;
@@ -47,16 +52,12 @@ export const setupFFmpeg = () => {
 	};
 
 	const unzipFfmpeg = () => {
-		const { createReadStream } = require("fs");
-		const unzipper = require("unzipper");
-
-		createReadStream(ffmpegDownloadOptions.zipPath)
-			.pipe(unzipper.Extract({ path: ffmpegDownloadOptions.folderPath }))
-			.on("finish", () => {
-				console.log("Unzipped successfully!");
+		decompress(ffmpegDownloadOptions.zipPath, ffmpegDownloadOptions.folderPath)
+			.then(() => {
+				console.log("unzipped");
 			})
-			.on("error", (err) => {
-				console.error("Error while unzipping:", err);
+			.catch((error) => {
+				console.log(error);
 			});
 	};
 };

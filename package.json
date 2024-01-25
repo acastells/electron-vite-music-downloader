@@ -29,9 +29,9 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.6",
     "@mui/material": "^5.15.6",
+    "decompress": "^4.2.1",
     "electron-dl": "^3.5.1",
     "electron-updater": "^6.1.7",
-    "unzipper": "^0.10.14",
     "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
