@@ -5,11 +5,6 @@ const fs = require("fs");
 export const setupFFmpeg = () => {
 	app.whenReady().then(() => {
 		ipcMain.on("download_ffmpeg", downloadFfmpeg);
-		ipcMain.on("download_dlp", () => {});
-		ipcMain.on("clear_success", () => {});
-		ipcMain.on("clear_warning", () => {});
-		ipcMain.on("clear_all", () => {});
-		ipcMain.on("download", () => {});
 	});
 
 	let ffmpegDownloadOptions = {

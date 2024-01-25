@@ -10,8 +10,8 @@ export type ContextBridgeApi = {
 
 // Custom APIs for renderer
 const exposedApi: ContextBridgeApi = {
-	send: (channel) => {
-		ipcRenderer.send(channel)
+	send: (channel, data = null) => {
+		ipcRenderer.send(channel, data);
 	},
 	receive: (channel, func) => {
 		ipcRenderer.on(channel, (_event, ...args) => func(...args));

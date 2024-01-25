@@ -96,7 +96,7 @@ function App(): JSX.Element {
 						<Button onClick={() => window.api.send("download_ffmpeg")}>
 							<SystemUpdateIcon /> FFMPEG
 						</Button>
-						<Button>
+						<Button onClick={() => window.api.send("download_dlp")}>
 							<SystemUpdateIcon /> DLP
 						</Button>
 					</ButtonGroup>
