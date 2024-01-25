@@ -1,7 +1,7 @@
-type TrackTypeType = "ByName" | "ByID" | "CSV" | "SpotifyPlaylistURL" | "BeatportTopURL";
-type TrackStatusType = "Pending" | "Downloading" | "Warning" | "Error" | "Success";
+export type TrackType = "ByName" | "ByID" | "CSV" | "SpotifyPlaylistURL" | "BeatportTopURL";
+export type TrackStatus = "Pending" | "Downloading" | "Warning" | "Error" | "Success";
 
-export const TrackType: Record<string, TrackTypeType> = {
+export const TrackTypeObject: Record<string, TrackType> = {
 	ByName: "ByName",
 	ByID: "ByID",
 	CSV: "CSV",
@@ -9,7 +9,7 @@ export const TrackType: Record<string, TrackTypeType> = {
 	BeatportTopURL: "BeatportTopURL",
 };
 
-export const TrackStatus: Record<string, TrackStatusType> = {
+export const TrackStatusObject: Record<string, TrackStatus> = {
 	Pending: "Pending",
 	Downloading: "Downloading",
 	Warning: "Warning",
@@ -21,11 +21,11 @@ export interface Track {
 	id: number;
 	name: string;
 	path: string;
-	type: TrackTypeType;
+	type: TrackType;
 	length: number;
 	progress: number;
 	similarity: number;
 	completed: boolean;
-	status: TrackStatusType;
+	status: TrackStatus;
 	msg: string;
 }

@@ -1,24 +1,24 @@
 import {
-  Button,
-  ButtonGroup,
-  Container,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
+	Button,
+	ButtonGroup,
+	Container,
+	FormControl,
+	Grid,
+	InputLabel,
+	MenuItem,
+	Paper,
+	Select,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	TextField,
+	Typography,
 } from "@mui/material";
 import React from "react";
-import { Track, TrackStatus, TrackType } from "./vm";
+import { Track, TrackType, TrackTypeObject } from "./vm";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -34,24 +34,24 @@ import LinearProgress from "@mui/material/LinearProgress";
 
 function App(): JSX.Element {
 	const [tracks, setTracks] = React.useState<Track[]>([]);
+	const [newTrack, setNewTrack] = React.useState<{ name: string; type: TrackType }>({
+		name: "",
+		type: "ByName",
+	});
 
 	React.useEffect(() => {
-		setTracks([
-			...tracks,
-			{
-				id: Date.now(),
-				name: "Bangarang",
-				path: "/Desktop/",
-				type: TrackType.ByName,
-				length: 330,
-				progress: 50,
-				similarity: 25,
-				completed: false,
-				status: TrackStatus.Pending,
-				msg: "",
-			},
-		]);
+		setTracks([]);
+		window.api.receive("tracks", console.log);
 	}, []);
+
+	const handleDownloadTrack = () => {
+		if (!newTrack.name) {
+			console.log("Track name or url can not be empty");
+			return;
+		}
+
+		window.api.send("download", newTrack);
+	};
 
 	return (
 		<Container sx={{ p: 4 }}>
@@ -60,18 +60,30 @@ function App(): JSX.Element {
 			</Typography>
 			<Grid container spacing={4} sx={{ mt: 1, mb: 2 }}>
 				<Grid item xs={5}>
-					<TextField fullWidth variant="outlined" label="Track or URL"></TextField>
+					<TextField
+						fullWidth
+						variant="outlined"
+						label="Track or URL"
+						value={newTrack.name}
+						onChange={(e) =>
+							setNewTrack({ ...newTrack, name: e.target.value })
+						}></TextField>
 				</Grid>
 				<Grid item xs={2}>
 					<FormControl fullWidth>
 						<InputLabel id="demo-simple-select-label">Type</InputLabel>
 						<Select
 							labelId="demo-simple-select-label"
-							value={Object.entries(TrackType)[0][0]}
+							value={newTrack.type}
 							label="Type"
-							onChange={() => {}}>
-							{Object.entries(TrackType).map(([key, value]) => (
-								<MenuItem key={key} value={key}>{value}</MenuItem>
+							onChange={(e) =>
+								setNewTrack({ ...newTrack, type: e.target.value as TrackType })
+							}>
+							<MenuItem disabled>-- Choose --</MenuItem>
+							{Object.entries(TrackTypeObject).map(([key, value]) => (
+								<MenuItem key={key} value={value}>
+									{value}
+								</MenuItem>
 							))}
 						</Select>
 					</FormControl>
@@ -82,7 +94,7 @@ function App(): JSX.Element {
 					justifyContent={"center"}
 					alignItems={"center"}
 					flexDirection={"row"}>
-					<Button fullWidth variant="outlined">
+					<Button fullWidth variant="outlined" onClick={handleDownloadTrack}>
 						<DownloadIcon />
 					</Button>
 				</Grid>

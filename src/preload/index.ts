@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from "electron";
 export type ContextBridgeApi = {
 	// Declare a `readFile` function that will return a promise. This promise
 	// will contain the data of the file read from the main process.
-	send: (channel) => void;
+	send: (channel, data?) => void;
 	receive: (channel, func) => void;
 };
 
