@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, app, ipcMain } from "electron";
 import { Track } from "../vm";
 
 const Store = require("electron-store");
@@ -6,7 +6,11 @@ const Store = require("electron-store");
 export const dbStore = new Store();
 
 export const setupDB = () => {
-	// dbStore.clear();
+	app.whenReady().then(() => {
+		ipcMain.on("getTracks", updateToRenderer);
+		ipcMain.on("dbDebug", dbDebug);
+		ipcMain.on("dbClear", dbClear);
+	});
 };
 
 export const updateToRenderer = () => {
@@ -20,14 +24,18 @@ export const upsertTrack = (track: Track) => {
 	updateToRenderer();
 };
 
-export const getAllTracks = () => {
-	return dbStore.get("tracks");
+const dbDebug = () => {
+	console.log(dbStore.get("tracks"));
+};
+
+const dbClear = () => {
+	dbStore.clear();
 };
 
 const transformObjectToArray = (obj) => {
-    const arr: Track[] = [];
-    for (const key in obj) {
-        arr.push(obj[key]);
-    }
-    return arr;
-}
+	const arr: Track[] = [];
+	for (const key in obj) {
+		arr.push(obj[key]);
+	}
+	return arr;
+};

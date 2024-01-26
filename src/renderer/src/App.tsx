@@ -41,6 +41,7 @@ function App(): JSX.Element {
 
 	React.useEffect(() => {
 		window.api.receive("tracks", setTracks);
+		window.api.send("getTracks")
 	}, []);
 
 	const handleDownloadTrack = () => {
@@ -146,6 +147,7 @@ function App(): JSX.Element {
 								<TableCell>
 									<LinearProgress
 										variant="determinate"
+										color={track.completed === true ? "success": "primary"}
 										value={track.progress}></LinearProgress>
 								</TableCell>
 								<TableCell>{track.length}</TableCell>
