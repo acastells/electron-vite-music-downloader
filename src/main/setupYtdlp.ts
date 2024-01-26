@@ -1,7 +1,8 @@
-import { app, ipcMain, BrowserWindow } from "electron";
+import { app, ipcMain } from "electron";
 import path from "path";
-import { versionFFmpeg } from "./setupFfmpeg";
 import { Track, TrackTypeObject } from "./../vm";
+import { upsertTrack } from "./setupDB";
+import { versionFFmpeg } from "./setupFfmpeg";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 
 export const setupYtdlp = () => {
@@ -29,7 +30,6 @@ export const setupYtdlp = () => {
 	};
 
 	const downloadTrack = (_event, listener) => {
-		const mainWindow = BrowserWindow.getFocusedWindow() as BrowserWindow 
 		const ytDlpWrap = new YTDlpWrap(binaryPath);
 		const { name, type } = listener;
 
@@ -39,7 +39,7 @@ export const setupYtdlp = () => {
 		}
 
 		const track: Track = {
-			id: Date.now(),
+			id: Date.now().toString() + "_id",
 			name: name,
 			path: path.join(downloadedMusicPath, name),
 			type: type,
@@ -50,6 +50,8 @@ export const setupYtdlp = () => {
 			status: "Pending",
 			msg: "",
 		};
+
+		upsertTrack(track);
 
 		let ytDlpEventEmitter = ytDlpWrap
 			.exec([
@@ -68,17 +70,17 @@ export const setupYtdlp = () => {
 				defaultSearch,
 			])
 			.on("progress", (progress) => {
-				track.progress = progress.percent
-				mainWindow.webContents.send("tracks", [{...track}])
+				track.progress = progress.percent;
+				upsertTrack(track);
 			})
 			.on("ytDlpEvent", (eventType, eventData) =>
 				console.log("ytDlpEvent", eventType, eventData)
 			)
 			.on("error", (error) => console.error(error))
-			.on("close", () => console.log("all done"));
-
-		// TODO: save track
-		mainWindow.webContents.send("tracks", [{...track}])
+			.on("close", () => {
+				track.completed = true;
+				upsertTrack(track);
+			});
 
 		console.log("PID:", ytDlpEventEmitter.ytDlpProcess.pid, track);
 	};

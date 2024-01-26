@@ -40,7 +40,7 @@ export const setupFFmpeg = () => {
 			try {
 				const url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest";
 				const finalUrl = `${url}/${versionFFmpeg}`;
-				const win = BrowserWindow.getFocusedWindow();
+				const win = BrowserWindow.getAllWindows()[0];
 				ffmpegDownloadOptions.onStarted = () => {};
 				ffmpegDownloadOptions.onCompleted = unzipFfmpeg;
 				const { download } = require("electron-dl");

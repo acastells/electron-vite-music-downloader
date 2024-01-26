@@ -31,6 +31,7 @@
     "@mui/material": "^5.15.6",
     "decompress": "^4.2.1",
     "electron-dl": "^3.5.1",
+    "electron-store": "^8.1.0",
     "electron-updater": "^6.1.7",
     "yt-dlp-wrap": "^2.3.12"
   },

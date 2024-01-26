@@ -18,7 +18,7 @@ export const TrackStatusObject: Record<TrackStatus, TrackStatus> = {
 };
 
 export interface Track {
-	id: number;
+	id: string;
 	name: string;
 	path: string;
 	type: TrackType;

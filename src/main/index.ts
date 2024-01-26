@@ -4,6 +4,7 @@ import { join } from "path";
 import icon from "../../resources/icon.png?asset";
 import { setupFFmpeg } from "./setupFfmpeg";
 import { setupYtdlp } from "./setupYtdlp";
+import { setupDB } from "./setupDB";
 
 function createWindow(): void {
 	// Create the browser window.
@@ -52,6 +53,7 @@ app.whenReady().then(() => {
 	});
 
 	createWindow();
+	setupDB()
 	setupFFmpeg();
 	setupYtdlp();
 
