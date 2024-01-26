@@ -1,9 +1,13 @@
-import { app, ipcMain } from "electron";
+import { app, ipcMain, BrowserWindow } from "electron";
 import path from "path";
 import { versionFFmpeg } from "./setupFfmpeg";
+import { Track, TrackTypeObject } from "./../vm";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 
 export const setupYtdlp = () => {
+	const downloadedMusicPath = app.getPath("desktop");
+
+	// yt-dlp.exe must be in the same folder as ffmpeg.exe
 	const binaryPath = path.join(
 		app.getPath("appData"),
 		"Music Downloader",
@@ -11,15 +15,6 @@ export const setupYtdlp = () => {
 		versionFFmpeg,
 		"bin",
 		"yt-dlp.exe"
-	);
-	const downloadPath = app.getPath("desktop");
-	const ffmpegPath = path.join(
-		app.getPath("appData"),
-		"Music Downloader",
-		"ffmpeg",
-		versionFFmpeg,
-		"bin",
-		"ffmpeg.exe"
 	);
 
 	app.whenReady().then(() => {
@@ -34,33 +29,57 @@ export const setupYtdlp = () => {
 	};
 
 	const downloadTrack = (_event, listener) => {
-		const { name, type } = listener;
-		console.log(name, type);
-
+		const mainWindow = BrowserWindow.getFocusedWindow() as BrowserWindow 
 		const ytDlpWrap = new YTDlpWrap(binaryPath);
+		const { name, type } = listener;
+
+		let defaultSearch = "";
+		if (type !== TrackTypeObject.ByID) {
+			defaultSearch = "ytsearch:";
+		}
+
+		const track: Track = {
+			id: Date.now(),
+			name: name,
+			path: path.join(downloadedMusicPath, name),
+			type: type,
+			length: 0,
+			progress: 0,
+			similarity: 0,
+			completed: false,
+			status: "Pending",
+			msg: "",
+		};
 
 		let ytDlpEventEmitter = ytDlpWrap
 			.exec([
-				"https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+				name,
 				"-o",
-				"%(title)s - %(artist)s.%(ext)s",
+				"%(title)s - %(artist)s",
 				"-P",
-				downloadPath,
+				downloadedMusicPath,
 				"--extract-audio",
 				"--audio-format",
 				"mp3",
 				"--audio-quality",
 				"320",
-				"--ffmpeg-location",
-				ffmpegPath,
+				"--force-overwrites",
 				"--default-search",
-				"ytsearch:",
+				defaultSearch,
 			])
-			.on("progress", (progress) => console.log(progress.percent))
-			.on("ytDlpEvent", (eventType, eventData) => console.log("hey", eventType, eventData))
+			.on("progress", (progress) => {
+				track.progress = progress.percent
+				mainWindow.webContents.send("tracks", [{...track}])
+			})
+			.on("ytDlpEvent", (eventType, eventData) =>
+				console.log("ytDlpEvent", eventType, eventData)
+			)
 			.on("error", (error) => console.error(error))
 			.on("close", () => console.log("all done"));
 
-		console.log(ytDlpEventEmitter.ytDlpProcess.pid);
+		// TODO: save track
+		mainWindow.webContents.send("tracks", [{...track}])
+
+		console.log("PID:", ytDlpEventEmitter.ytDlpProcess.pid, track);
 	};
 };

@@ -1,7 +1,7 @@
 export type TrackType = "ByName" | "ByID" | "CSV" | "SpotifyPlaylistURL" | "BeatportTopURL";
 export type TrackStatus = "Pending" | "Downloading" | "Warning" | "Error" | "Success";
 
-export const TrackTypeObject: Record<string, TrackType> = {
+export const TrackTypeObject: Record<TrackType, TrackType> = {
 	ByName: "ByName",
 	ByID: "ByID",
 	CSV: "CSV",
@@ -9,7 +9,7 @@ export const TrackTypeObject: Record<string, TrackType> = {
 	BeatportTopURL: "BeatportTopURL",
 };
 
-export const TrackStatusObject: Record<string, TrackStatus> = {
+export const TrackStatusObject: Record<TrackStatus, TrackStatus> = {
 	Pending: "Pending",
 	Downloading: "Downloading",
 	Warning: "Warning",

@@ -4,9 +4,8 @@
     "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx"
-  ],
+, "src/vm.ts"  ],
   "compilerOptions": {
-    "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {

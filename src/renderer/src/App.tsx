@@ -18,7 +18,7 @@ import {
 	Typography,
 } from "@mui/material";
 import React from "react";
-import { Track, TrackType, TrackTypeObject } from "./vm";
+import { Track, TrackType, TrackTypeObject } from "../../vm";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -40,8 +40,7 @@ function App(): JSX.Element {
 	});
 
 	React.useEffect(() => {
-		setTracks([]);
-		window.api.receive("tracks", console.log);
+		window.api.receive("tracks", setTracks);
 	}, []);
 
 	const handleDownloadTrack = () => {
@@ -147,7 +146,7 @@ function App(): JSX.Element {
 								<TableCell>
 									<LinearProgress
 										variant="determinate"
-										value={50}></LinearProgress>
+										value={track.progress}></LinearProgress>
 								</TableCell>
 								<TableCell>{track.length}</TableCell>
 								<TableCell>{track.similarity}</TableCell>
