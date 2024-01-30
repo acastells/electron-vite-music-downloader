@@ -2,7 +2,7 @@ import { app, ipcMain } from "electron";
 import path from "path";
 import { Track, TrackTypeObject } from "./../vm";
 import { pathFfprobe, versionFFmpeg } from "./paths";
-import { getTracks, upsertTrack } from "./setupDB";
+import { getTracks, removeTrack, upsertTrack } from "./setupDB";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
 const { exec } = require("child_process");
@@ -24,7 +24,44 @@ export const setupYtdlp = () => {
 		ipcMain.on("download_dlp", setupDlp);
 		ipcMain.on("download", downloadTrack);
 		ipcMain.on("rename_files", renameFiles);
+		ipcMain.on("playTrack", playTrack);
+		ipcMain.on("hideTrack", hideTrack);
+		ipcMain.on("retryTrack", retryTrack);
+		ipcMain.on("deleteTrack", deleteTrack);
 	});
+
+	const playTrack = (_event, track: Track) => {
+		exec(`start wmplayer "${track.path}"`, (error) => {
+			if (error) {
+				console.error("Error:", error);
+			}
+		});
+	};
+
+	const hideTrack = (_event, track: Track) => {
+		removeTrack(track);		
+	};
+
+	const retryTrack = (_event, track: Track) => {
+		removeTrack(track);
+		try {
+			fs.unlinkSync(track.path);
+			console.log("File is deleted.");
+		} catch (err) {
+			console.error(err);
+		}
+		downloadTrack(null, { name: track.originalName, type: TrackTypeObject.ByName });
+	};
+
+	const deleteTrack = (_event, track: Track) => {
+		removeTrack(track);
+		try {
+			fs.unlinkSync(track.path);
+			console.log("File is deleted.");
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	const setupDlp = async () => {
 		YTDlpWrap.downloadFromGithub(binaryPath).then(() => {
@@ -148,7 +185,7 @@ export const setupYtdlp = () => {
 			])
 			.on("progress", (progress) => {
 				track.progress = progress.percent;
-				track.status = "Downloading"
+				track.status = "Downloading";
 				upsertTrack(track);
 			})
 			.on("ytDlpEvent", (_eventType, eventData) => {
@@ -176,21 +213,20 @@ export const setupYtdlp = () => {
 				track.path = newPath;
 				upsertTrack(track);
 				getAudioInfo(track.path).then(({ duration, bitrate }) => {
-					track.length = duration
+					track.length = duration;
 					if (bitrate < 320000) {
-						track.msg += "Bad bitrate! "
-						track.status = "Warning"
+						track.msg += "Bad bitrate! ";
+						track.status = "Warning";
 					}
-					if (duration < 120 || duration > 480){
-						track.msg += "Track seems too short or too long! "
-						track.status = "Warning"
+					if (duration < 120 || duration > 480) {
+						track.msg += "Track seems too short or too long! ";
+						track.status = "Warning";
 					}
 					upsertTrack(track);
 				});
 			});
 	};
 };
-
 
 const getAudioInfo = (filePath): Promise<{ duration: number; bitrate: number }> => {
 	return new Promise((resolve, reject) => {

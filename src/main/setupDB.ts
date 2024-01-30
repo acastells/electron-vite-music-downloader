@@ -34,6 +34,11 @@ export const getTracks = () => {
 	return transformObjectToArray(tracks);
 };
 
+export const removeTrack = (track: Track) => {
+	dbStore.delete(`tracks.${track.id}`);
+	updateToRenderer();
+}
+
 const dbDebug = () => {
 	console.log(dbStore.get("tracks"));
 	updateToRenderer();

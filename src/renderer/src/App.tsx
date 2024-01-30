@@ -21,7 +21,6 @@ import React from "react";
 import { Track, TrackType, TrackTypeObject } from "../../vm";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -41,7 +40,7 @@ function App(): JSX.Element {
 
 	React.useEffect(() => {
 		window.api.receive("tracks", setTracks);
-		window.api.send("getTracks")
+		window.api.send("getTracks");
 	}, []);
 
 	const handleDownloadTrack = () => {
@@ -101,7 +100,7 @@ function App(): JSX.Element {
 						dbDebug
 					</Button>
 					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbClear")}>
-					dbClear
+						dbClear
 					</Button>
 				</Grid>
 				<Grid
@@ -153,24 +152,29 @@ function App(): JSX.Element {
 								<TableCell>
 									<LinearProgress
 										variant="determinate"
-										color={track.completed === true ? "success": "primary"}
+										color={track.completed === true ? "success" : "primary"}
 										value={track.progress}></LinearProgress>
 								</TableCell>
 								<TableCell>{track.length}</TableCell>
 								<TableCell>{track.similarity}</TableCell>
 								<TableCell>{track.status}</TableCell>
 								<TableCell>
-									<Button color="success">
+									<Button
+										color="success"
+										onClick={() => window.api.send("playTrack", track)}>
 										<PlayArrowIcon />
 									</Button>
-									<Button>
+									<Button onClick={() => window.api.send("hideTrack", track)}>
 										<HideSourceIcon />
 									</Button>
-									<Button color="warning">
-										<DeleteIcon />
+									<Button
+										color="warning"
+										onClick={() => window.api.send("retryTrack", track)}>
 										<ReplayIcon />
 									</Button>
-									<Button color="error">
+									<Button
+										color="error"
+										onClick={() => window.api.send("deleteTrack", track)}>
 										<DeleteForeverIcon />
 									</Button>
 								</TableCell>
