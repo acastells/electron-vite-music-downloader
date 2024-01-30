@@ -20,6 +20,7 @@ export const TrackStatusObject: Record<TrackStatus, TrackStatus> = {
 export interface Track {
 	id: string;
 	name: string;
+	originalName: string;
 	path: string;
 	type: TrackType;
 	length: number;
