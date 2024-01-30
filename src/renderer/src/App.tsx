@@ -15,10 +15,11 @@ import {
 	TableHead,
 	TableRow,
 	TextField,
+	Tooltip,
 	Typography,
 } from "@mui/material";
 import React from "react";
-import { Track, TrackType, TrackTypeObject } from "../../vm";
+import { Track, TrackStatus, TrackType, TrackTypeObject } from "../../vm";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -60,6 +61,23 @@ function App(): JSX.Element {
 			);
 		}
 	}, [newTrack.type]);
+
+	const getStatusColor = (status: TrackStatus) => {
+		switch (status) {
+			case "Warning":
+				return "orange";
+			case "Error":
+				return "red";
+			case "Downloading":
+				return "blue";
+			case "Pending":
+				return "lightblue";
+			case "Success":
+				return "green";
+			default:
+				return "white";
+		}
+	};
 
 	return (
 		<Container sx={{ p: 4 }}>
@@ -166,7 +184,11 @@ function App(): JSX.Element {
 								</TableCell>
 								<TableCell>{track.length}</TableCell>
 								<TableCell>{track.similarity}</TableCell>
-								<TableCell>{track.status}</TableCell>
+								<TableCell sx={{ color: getStatusColor(track.status) }}>
+									<Tooltip title={JSON.stringify(track.msg)}>
+										<span>{track.status}</span>
+									</Tooltip>
+								</TableCell>
 								<TableCell>
 									<Button
 										color="success"

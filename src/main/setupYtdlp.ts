@@ -7,10 +7,10 @@ import { readCsvFilePromise } from "./utils";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
 const { exec } = require("child_process");
-const async = require('async');
+const async = require("async");
 
 export const setupYtdlp = () => {
-	const downloadedMusicPath = app.getPath("desktop");
+	const downloadedMusicPath = path.join(app.getPath("desktop"), "MusicDownloaded");
 
 	// yt-dlp.exe must be in the same folder as ffmpeg.exe
 	const binaryPath = path.join(
@@ -151,12 +151,12 @@ export const setupYtdlp = () => {
 
 	const downloadTracks = (tracks: string[]) => {
 		async.eachLimit(tracks, 4, (trackName, callback) => {
-			let processDlp = downloadTrack(null, {name:trackName, type:TrackTypeObject.ByName })		  
-			  processDlp.on('close', () => {
+			let processDlp = downloadTrack(null, { name: trackName, type: TrackTypeObject.ByName });
+			processDlp.on("close", () => {
 				callback(); // Notify async that the download is complete
-			  });
-		})
-	}
+			});
+		});
+	};
 
 	const downloadTrack = (_event, listener) => {
 		const ytDlpWrap = new YTDlpWrap(binaryPath);
@@ -165,7 +165,7 @@ export const setupYtdlp = () => {
 		if (type === TrackTypeObject.CSV) {
 			readCsvFilePromise(name)
 				.then((csvData: string[]) => {
-					downloadTracks(csvData)
+					downloadTracks(csvData);
 				})
 				.catch((error) => {
 					console.error(error);
@@ -239,25 +239,32 @@ export const setupYtdlp = () => {
 				track.completed = true;
 				track.status = "Success";
 				track.progress = 100;
-				const [newName, newPath] = renameFile(path.parse(track.path));
-				track.name = newName;
-				track.path = newPath;
-				upsertTrack(track);
-				getAudioInfo(track.path).then(({ duration, bitrate }) => {
-					track.length = duration;
-					if (bitrate < 320000) {
-						track.msg += "Bad bitrate! ";
-						track.status = "Warning";
-					}
-					if (duration < 120 || duration > 480) {
-						track.msg += "Track seems too short or too long! ";
-						track.status = "Warning";
-					}
+				try {
+					const [newName, newPath] = renameFile(path.parse(track.path));
+					track.name = newName;
+					track.path = newPath;
 					upsertTrack(track);
-				});
+					getAudioInfo(track.path).then(({ duration, bitrate }) => {
+						track.length = duration;
+						if (bitrate < 320000) {
+							track.msg += "Bad bitrate! ";
+							track.status = "Warning";
+						}
+						if (duration < 120 || duration > 480) {
+							track.msg += "Track seems too short or too long! ";
+							track.status = "Warning";
+						}
+						upsertTrack(track);
+					});
+				} catch (e) {
+					console.error(e);
+					track.status = "Warning";
+					track.msg = e as string;
+					upsertTrack(track);
+				}
 			});
 
-			return ytDlpEventEmitter
+		return ytDlpEventEmitter;
 	};
 };
 
