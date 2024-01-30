@@ -97,6 +97,12 @@ function App(): JSX.Element {
 					<Button fullWidth variant="outlined" onClick={handleDownloadTrack}>
 						<DownloadIcon />
 					</Button>
+					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbDebug")}>
+						dbDebug
+					</Button>
+					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbClear")}>
+					dbClear
+					</Button>
 				</Grid>
 				<Grid
 					item

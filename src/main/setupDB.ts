@@ -24,15 +24,27 @@ export const upsertTrack = (track: Track) => {
 	updateToRenderer();
 };
 
+export const getTrack = (trackId: string) => {
+	const track = dbStore.get(`tracks.${trackId}`);
+	return transformObjectToArray(track)[0]
+};
+
+export const getTracks = () => {
+	const tracks = dbStore.get("tracks");
+	return transformObjectToArray(tracks);
+};
+
 const dbDebug = () => {
 	console.log(dbStore.get("tracks"));
+	updateToRenderer();
 };
 
 const dbClear = () => {
 	dbStore.clear();
+	updateToRenderer();
 };
 
-const transformObjectToArray = (obj) => {
+const transformObjectToArray = (obj): Track[] => {
 	const arr: Track[] = [];
 	for (const key in obj) {
 		arr.push(obj[key]);

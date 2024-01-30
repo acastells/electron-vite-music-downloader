@@ -1,9 +1,8 @@
 import { BrowserWindow, app, ipcMain } from "electron";
 import path from "path";
+import { versionFFmpeg } from "./paths";
 const fs = require("fs");
 const decompress = require("decompress");
-
-export const versionFFmpeg = "ffmpeg-master-latest-win64-lgpl-shared";
 
 export const setupFFmpeg = () => {
 	app.whenReady().then(() => {
