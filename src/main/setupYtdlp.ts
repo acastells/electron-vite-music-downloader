@@ -7,6 +7,7 @@ import { readCsvFilePromise } from "./utils";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
 const { exec } = require("child_process");
+const async = require('async');
 
 export const setupYtdlp = () => {
 	const downloadedMusicPath = app.getPath("desktop");
@@ -148,6 +149,15 @@ export const setupYtdlp = () => {
 		return [pathParsed.base, path.join(pathParsed.dir, pathParsed.base)];
 	};
 
+	const downloadTracks = (tracks: string[]) => {
+		async.eachLimit(tracks, 4, (trackName, callback) => {
+			let processDlp = downloadTrack(null, {name:trackName, type:TrackTypeObject.ByName })		  
+			  processDlp.on('close', () => {
+				callback(); // Notify async that the download is complete
+			  });
+		})
+	}
+
 	const downloadTrack = (_event, listener) => {
 		const ytDlpWrap = new YTDlpWrap(binaryPath);
 		const { name, type } = listener;
@@ -155,9 +165,7 @@ export const setupYtdlp = () => {
 		if (type === TrackTypeObject.CSV) {
 			readCsvFilePromise(name)
 				.then((csvData: string[]) => {
-					for (const trackName of csvData) {
-						downloadTrack(null, { name: trackName, type: TrackTypeObject.ByName });
-					}
+					downloadTracks(csvData)
 				})
 				.catch((error) => {
 					console.error(error);
@@ -186,7 +194,7 @@ export const setupYtdlp = () => {
 
 		upsertTrack(track);
 
-		ytDlpWrap
+		const ytDlpEventEmitter = ytDlpWrap
 			.exec([
 				name,
 				"-o",
@@ -213,7 +221,6 @@ export const setupYtdlp = () => {
 			})
 			.on("ytDlpEvent", (_eventType, eventData) => {
 				if (track.progress > 0 && eventData.includes("Destination:")) {
-					console.log(eventData);
 					const destination = eventData.trim().split("Destination: ")[1];
 					const escapedFilePath = destination.replace(/\\/g, "\\\\");
 					const pathParsed = path.parse(escapedFilePath);
@@ -249,6 +256,8 @@ export const setupYtdlp = () => {
 					upsertTrack(track);
 				});
 			});
+
+			return ytDlpEventEmitter
 	};
 };
 
