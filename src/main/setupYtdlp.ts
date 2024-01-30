@@ -80,6 +80,37 @@ export const setupYtdlp = () => {
 	};
 
 	const renameFile = (pathParsed: path.ParsedPath) => {
+		const renameFileAux = (
+			filePath: string,
+			oldText: string,
+			newText: string
+		): path.ParsedPath => {
+			const newFilePath = filePath.replace(oldText, newText);
+			fs.renameSync(filePath, newFilePath);
+			pathParsed = path.parse(newFilePath);
+			return pathParsed;
+		};
+
+		if (pathParsed.base.includes("|")) {
+			const filePath = path.join(pathParsed.dir, pathParsed.base);
+			pathParsed = renameFileAux(filePath, "|", "");
+		}
+
+		if (pathParsed.base.includes(" - NA.mp3")) {
+			const filePath = path.join(pathParsed.dir, pathParsed.base);
+			pathParsed = renameFileAux(filePath, " - NA.mp3", ".mp3");
+		}
+
+		if (pathParsed.base.includes(" - .mp3")) {
+			const filePath = path.join(pathParsed.dir, pathParsed.base);
+			pathParsed = renameFileAux(filePath, " - .mp3", ".mp3");
+		}
+
+		if (pathParsed.base.includes(" .mp3")) {
+			const filePath = path.join(pathParsed.dir, pathParsed.base);
+			pathParsed = renameFileAux(filePath, " .mp3", ".mp3");
+		}
+
 		const regexPatterns = [/\(([^)]+)\)/, /\[([^)]+)\]/];
 
 		const thingsToRemove = [
@@ -112,32 +143,6 @@ export const setupYtdlp = () => {
 					}
 				}
 			}
-		}
-
-		const renameFileAux = (
-			filePath: string,
-			oldText: string,
-			newText: string
-		): path.ParsedPath => {
-			const newFilePath = filePath.replace(oldText, newText);
-			fs.renameSync(filePath, newFilePath);
-			pathParsed = path.parse(newFilePath);
-			return pathParsed;
-		};
-
-		if (pathParsed.base.includes(" - NA.mp3")) {
-			const filePath = path.join(pathParsed.dir, pathParsed.base);
-			pathParsed = renameFileAux(filePath, " - NA.mp3", ".mp3");
-		}
-
-		if (pathParsed.base.includes(" - .mp3")) {
-			const filePath = path.join(pathParsed.dir, pathParsed.base);
-			pathParsed = renameFileAux(filePath, " - .mp3", ".mp3");
-		}
-
-		if (pathParsed.base.includes(" .mp3")) {
-			const filePath = path.join(pathParsed.dir, pathParsed.base);
-			pathParsed = renameFileAux(filePath, " .mp3", ".mp3");
 		}
 
 		return [pathParsed.base, path.join(pathParsed.dir, pathParsed.base)];
@@ -196,6 +201,10 @@ export const setupYtdlp = () => {
 				"--force-overwrites",
 				"--default-search",
 				defaultSearch,
+				"--replace-in-metadata",
+				"title,uploader",
+				"[_|]",
+				"-",
 			])
 			.on("progress", (progress) => {
 				track.progress = progress.percent;
@@ -204,6 +213,7 @@ export const setupYtdlp = () => {
 			})
 			.on("ytDlpEvent", (_eventType, eventData) => {
 				if (track.progress > 0 && eventData.includes("Destination:")) {
+					console.log(eventData);
 					const destination = eventData.trim().split("Destination: ")[1];
 					const escapedFilePath = destination.replace(/\\/g, "\\\\");
 					const pathParsed = path.parse(escapedFilePath);
