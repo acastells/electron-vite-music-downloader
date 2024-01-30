@@ -1,10 +1,11 @@
 import { app, ipcMain } from "electron";
 import path from "path";
 import { Track, TrackTypeObject } from "./../vm";
+import { pathFfprobe, versionFFmpeg } from "./paths";
 import { getTracks, upsertTrack } from "./setupDB";
-import { versionFFmpeg } from "./paths";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
+const { exec } = require("child_process");
 
 export const setupYtdlp = () => {
 	const downloadedMusicPath = app.getPath("desktop");
@@ -147,6 +148,7 @@ export const setupYtdlp = () => {
 			])
 			.on("progress", (progress) => {
 				track.progress = progress.percent;
+				track.status = "Downloading"
 				upsertTrack(track);
 			})
 			.on("ytDlpEvent", (_eventType, eventData) => {
@@ -169,10 +171,43 @@ export const setupYtdlp = () => {
 				track.completed = true;
 				track.status = "Success";
 				track.progress = 100;
-				const [newName, newPath] = renameFile(path.parse(track.path))
-				track.name = newName
-				track.path = newPath
+				const [newName, newPath] = renameFile(path.parse(track.path));
+				track.name = newName;
+				track.path = newPath;
 				upsertTrack(track);
+				getAudioInfo(track.path).then(({ duration, bitrate }) => {
+					track.length = duration
+					if (bitrate < 320000) {
+						track.msg += "Bad bitrate! "
+						track.status = "Warning"
+					}
+					if (duration < 120 || duration > 480){
+						track.msg += "Track seems too short or too long! "
+						track.status = "Warning"
+					}
+					upsertTrack(track);
+				});
 			});
 	};
+};
+
+
+const getAudioInfo = (filePath): Promise<{ duration: number; bitrate: number }> => {
+	return new Promise((resolve, reject) => {
+		const command = `"${pathFfprobe}" -v error -select_streams a:0 -show_entries stream=duration,bit_rate -of default=noprint_wrappers=1:nokey=1 "${filePath}"`;
+
+		exec(command, (error, stdout, _stderr) => {
+			if (error) {
+				reject(error);
+				return;
+			}
+
+			const [duration, bitrate] = stdout.trim().split("\n");
+
+			resolve({
+				duration: parseFloat(duration),
+				bitrate: parseInt(bitrate),
+			});
+		});
+	});
 };
