@@ -211,7 +211,7 @@ export const setupYtdlp = () => {
 				defaultSearch,
 				"--replace-in-metadata",
 				"title,uploader",
-				"[_|]",
+				"[_|:/]",
 				"-",
 			])
 			.on("progress", (progress) => {

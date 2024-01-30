@@ -10,6 +10,8 @@ export const setupDB = () => {
 		ipcMain.on("getTracks", updateToRenderer);
 		ipcMain.on("dbDebug", dbDebug);
 		ipcMain.on("dbClear", dbClear);
+		ipcMain.on("removeSuccessTracks", removeSuccessTracks);
+		ipcMain.on("removeWarningTracks", removeWarningTracks);
 	});
 };
 
@@ -37,6 +39,24 @@ export const getTracks = () => {
 export const removeTrack = (track: Track) => {
 	dbStore.delete(`tracks.${track.id}`);
 	updateToRenderer();
+}
+
+export const removeSuccessTracks = () => {
+	const tracks = getTracks();
+	for (const track of tracks) {
+		if (track.status === "Success") {
+			removeTrack(track);
+		}
+	}
+}
+
+export const removeWarningTracks = () => {
+	const tracks = getTracks();
+	for (const track of tracks) {
+		if (track.status === "Warning") {
+			removeTrack(track);
+		}
+	}
 }
 
 const dbDebug = () => {

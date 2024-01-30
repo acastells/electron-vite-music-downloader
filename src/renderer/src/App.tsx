@@ -69,7 +69,7 @@ function App(): JSX.Element {
 			case "Error":
 				return "red";
 			case "Downloading":
-				return "blue";
+				return "lightblue";
 			case "Pending":
 				return "lightblue";
 			case "Success":
@@ -126,9 +126,6 @@ function App(): JSX.Element {
 					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbDebug")}>
 						dbDebug
 					</Button>
-					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbClear")}>
-						dbClear
-					</Button>
 				</Grid>
 				<Grid
 					item
@@ -145,13 +142,13 @@ function App(): JSX.Element {
 						</Button>
 					</ButtonGroup>
 					<ButtonGroup fullWidth>
-						<Button>
+						<Button onClick={() => window.api.send("removeSuccessTracks")}>
 							<ClearAllIcon /> <DoneIcon />
 						</Button>
-						<Button>
+						<Button onClick={() => window.api.send("removeWarningTracks")}>
 							<ClearAllIcon /> <WarningIcon />
 						</Button>
-						<Button>
+						<Button onClick={() => window.api.send("dbClear")}>
 							<ClearAllIcon />{" "}
 						</Button>
 					</ButtonGroup>
@@ -174,7 +171,11 @@ function App(): JSX.Element {
 					<TableBody>
 						{tracks.map((track) => (
 							<TableRow key={track.id}>
-								<TableCell>{track.name}</TableCell>
+								<TableCell>
+									<Tooltip title={track.originalName}>
+										<span>{track.name}</span>
+									</Tooltip>
+								</TableCell>
 								<TableCell>{track.type}</TableCell>
 								<TableCell>
 									<LinearProgress
