@@ -29,6 +29,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.6",
     "@mui/material": "^5.15.6",
+    "csv-parser": "^3.0.0",
     "decompress": "^4.2.1",
     "electron-dl": "^3.5.1",
     "electron-store": "^8.1.0",

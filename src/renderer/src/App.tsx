@@ -52,6 +52,15 @@ function App(): JSX.Element {
 		window.api.send("download", newTrack);
 	};
 
+	React.useEffect(() => {
+		if (newTrack.type === "CSV") {
+			window.api.send("showOpenDialog");
+			window.api.receive("showOpenDialog", (path) =>
+				setNewTrack({ ...newTrack, name: path })
+			);
+		}
+	}, [newTrack.type]);
+
 	return (
 		<Container sx={{ p: 4 }}>
 			<Typography variant="h5" textAlign={"center"}>

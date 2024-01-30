@@ -3,6 +3,7 @@ import path from "path";
 import { Track, TrackTypeObject } from "./../vm";
 import { pathFfprobe, versionFFmpeg } from "./paths";
 import { getTracks, removeTrack, upsertTrack } from "./setupDB";
+import { readCsvFilePromise } from "./utils";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
 const { exec } = require("child_process");
@@ -39,7 +40,7 @@ export const setupYtdlp = () => {
 	};
 
 	const hideTrack = (_event, track: Track) => {
-		removeTrack(track);		
+		removeTrack(track);
 	};
 
 	const retryTrack = (_event, track: Track) => {
@@ -145,6 +146,19 @@ export const setupYtdlp = () => {
 	const downloadTrack = (_event, listener) => {
 		const ytDlpWrap = new YTDlpWrap(binaryPath);
 		const { name, type } = listener;
+
+		if (type === TrackTypeObject.CSV) {
+			readCsvFilePromise(name)
+				.then((csvData: string[]) => {
+					for (const trackName of csvData) {
+						downloadTrack(null, { name: trackName, type: TrackTypeObject.ByName });
+					}
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+			return;
+		}
 
 		let defaultSearch = "";
 		if (type !== TrackTypeObject.ByID) {
