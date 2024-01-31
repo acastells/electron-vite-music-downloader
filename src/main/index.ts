@@ -5,6 +5,7 @@ import icon from "../../resources/icon.png?asset";
 import { setupFFmpeg } from "./setupFfmpeg";
 import { setupYtdlp } from "./setupYtdlp";
 import { setupDB } from "./setupDB";
+import { setupUtilsLocalTracks } from "./utilsLocalTracks";
 
 function createWindow(): void {
 	// Create the browser window.
@@ -56,6 +57,7 @@ app.whenReady().then(() => {
 	setupDB()
 	setupFFmpeg();
 	setupYtdlp();
+	setupUtilsLocalTracks()
 
 	app.on("activate", function () {
 		// On macOS it's common to re-create a window in the app when the

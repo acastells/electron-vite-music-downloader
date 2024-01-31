@@ -29,7 +29,7 @@ export const upsertTrack = (track: Track) => {
 
 export const getTrack = (trackId: string) => {
 	const track = dbStore.get(`tracks.${trackId}`);
-	return transformObjectToArray(track)[0]
+	return transformObjectToArray(track)[0];
 };
 
 export const getTracks = () => {
@@ -40,7 +40,7 @@ export const getTracks = () => {
 export const removeTrack = (track: Track) => {
 	dbStore.delete(`tracks.${track.id}`);
 	updateToRenderer();
-}
+};
 
 export const removeSuccessTracks = () => {
 	const tracks = getTracks();
@@ -49,7 +49,7 @@ export const removeSuccessTracks = () => {
 			removeTrack(track);
 		}
 	}
-}
+};
 
 export const removeWarningTracks = () => {
 	const tracks = getTracks();
@@ -58,14 +58,14 @@ export const removeWarningTracks = () => {
 			removeTrack(track);
 		}
 	}
-}
+};
 
-const dbDebug = () => {
+export const dbDebug = () => {
 	log(dbStore.get("tracks"));
 	updateToRenderer();
 };
 
-const dbClear = () => {
+export const dbClear = () => {
 	dbStore.clear();
 	updateToRenderer();
 };
