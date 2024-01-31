@@ -213,10 +213,12 @@ export const setupYtdlp = () => {
 				"--force-overwrites",
 				"--default-search",
 				defaultSearch,
+
+				// correct dangerous filenames
 				"--replace-in-metadata",
-				"title,uploader",
-				"[_|:/]",
-				"-",
+				"title,channel,playlist",
+				"[^0-9a-zA-Z\- а-яА-Я\.]",
+				""
 			])
 			.on("progress", (progress) => {
 				track.progress = progress.percent;
@@ -224,6 +226,7 @@ export const setupYtdlp = () => {
 				upsertTrack(track);
 			})
 			.on("ytDlpEvent", (_eventType, eventData) => {
+				console.log(_eventType, eventData)
 				if (track.progress > 0 && eventData.includes("Destination:")) {
 					const destination = eventData.trim().split("Destination: ")[1];
 					const escapedFilePath = destination.replace(/\\/g, "\\\\");
