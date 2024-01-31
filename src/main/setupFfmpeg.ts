@@ -1,6 +1,7 @@
 import { BrowserWindow, app, ipcMain } from "electron";
 import path from "path";
 import { versionFFmpeg } from "./paths";
+import { log } from "./logger";
 const fs = require("fs");
 const decompress = require("decompress");
 
@@ -31,9 +32,9 @@ export const setupFFmpeg = () => {
 		const binPathExists = fs.existsSync(ffmpegDownloadOptions.binPath);
 
 		if (zipPathExists && binPathExists) {
-			console.log("ffmpeg.exists and is unzipped, no operation...");
+			log("ffmpeg.exists and is unzipped, no operation...");
 		} else if (zipPathExists && !binPathExists) {
-			console.log("ffmpeg.zip exists, unzipping...");
+			log("ffmpeg.zip exists, unzipping...");
 			unzipFfmpeg();
 		} else {
 			try {
@@ -45,7 +46,7 @@ export const setupFFmpeg = () => {
 				const { download } = require("electron-dl");
 				download(win, finalUrl, ffmpegDownloadOptions);
 			} catch (error) {
-				console.error(error);
+				log(JSON.stringify(error))
 			}
 		}
 	};
@@ -53,10 +54,10 @@ export const setupFFmpeg = () => {
 	const unzipFfmpeg = () => {
 		decompress(ffmpegDownloadOptions.zipPath, ffmpegDownloadOptions.folderPath)
 			.then(() => {
-				console.log("unzipped");
+				log("unzipped");
 			})
 			.catch((error) => {
-				console.log(error);
+				log(JSON.stringify(error))
 			});
 	};
 };

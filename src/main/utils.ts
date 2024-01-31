@@ -1,6 +1,7 @@
 const fs = require("fs");
 const csv = require("csv-parser");
 import { app, ipcMain, BrowserWindow, dialog } from "electron";
+import { log } from "./logger";
 
 export const readCsvFilePromise = (filePath): Promise<string[]> => {
 	return new Promise((resolve, reject) => {
@@ -34,6 +35,6 @@ export const showOpenDialog = (_event, _listener) => {
 			mainWindow.webContents.send("showOpenDialog", filePathSelected);
 		})
 		.catch((e) => {
-			console.log(e);
+			log(e);
 		});
 };

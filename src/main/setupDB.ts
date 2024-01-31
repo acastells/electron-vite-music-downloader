@@ -1,5 +1,6 @@
 import { BrowserWindow, app, ipcMain } from "electron";
 import { Track } from "../vm";
+import { log } from "./logger";
 
 const Store = require("electron-store");
 
@@ -60,7 +61,7 @@ export const removeWarningTracks = () => {
 }
 
 const dbDebug = () => {
-	console.log(dbStore.get("tracks"));
+	log(dbStore.get("tracks"));
 	updateToRenderer();
 };
 

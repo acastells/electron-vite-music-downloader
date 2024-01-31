@@ -31,6 +31,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import WarningIcon from "@mui/icons-material/Warning";
 import LinearProgress from "@mui/material/LinearProgress";
+import { Console } from "./components/Console";
 
 function App(): JSX.Element {
 	const [tracks, setTracks] = React.useState<Track[]>([]);
@@ -38,10 +39,13 @@ function App(): JSX.Element {
 		name: "",
 		type: "ByName",
 	});
+	const [showConsole, setShowConsole] = React.useState(false);
+	const [logConsole, setLogConsole] = React.useState<string[]>([]);
 
 	React.useEffect(() => {
 		window.api.receive("tracks", setTracks);
 		window.api.send("getTracks");
+		window.api.receive("logConsole", (newLog) => setLogConsole([...logConsole, newLog]));
 	}, []);
 
 	const handleDownloadTrack = () => {
@@ -84,7 +88,8 @@ function App(): JSX.Element {
 			<Typography variant="h5" textAlign={"center"}>
 				Music Downloader <Typography>By C4STI</Typography>
 			</Typography>
-			<Grid container spacing={4} sx={{ mt: 1, mb: 2 }}>
+			{showConsole && <Console output={logConsole} />}
+			<Grid container spacing={4} sx={{ mt: 2, mb: 2 }}>
 				<Grid item xs={5}>
 					<TextField
 						fullWidth
@@ -125,6 +130,12 @@ function App(): JSX.Element {
 					</Button>
 					<Button fullWidth variant="outlined" onClick={() => window.api.send("dbDebug")}>
 						dbDebug
+					</Button>
+					<Button
+						fullWidth
+						variant="outlined"
+						onClick={() => setShowConsole(!showConsole)}>
+						Console
 					</Button>
 				</Grid>
 				<Grid

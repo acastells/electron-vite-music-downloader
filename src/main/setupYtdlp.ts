@@ -4,6 +4,7 @@ import { Track, TrackTypeObject } from "./../vm";
 import { pathFfprobe, versionFFmpeg } from "./paths";
 import { getTracks, removeTrack, upsertTrack } from "./setupDB";
 import { readCsvFilePromise } from "./utils";
+import { log } from "./logger";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const fs = require("fs");
 const { exec } = require("child_process");
@@ -35,7 +36,7 @@ export const setupYtdlp = () => {
 	const playTrack = (_event, track: Track) => {
 		exec(`start wmplayer "${track.path}"`, (error) => {
 			if (error) {
-				console.error("Error:", error);
+				log(JSON.stringify(error))
 			}
 		});
 	};
@@ -48,9 +49,9 @@ export const setupYtdlp = () => {
 		removeTrack(track);
 		try {
 			fs.unlinkSync(track.path);
-			console.log("File is deleted.");
+			log("File is deleted.");
 		} catch (err) {
-			console.error(err);
+			log(JSON.stringify(err));
 		}
 		downloadTrack(null, { name: track.originalName, type: TrackTypeObject.ByName });
 	};
@@ -59,15 +60,15 @@ export const setupYtdlp = () => {
 		removeTrack(track);
 		try {
 			fs.unlinkSync(track.path);
-			console.log("File is deleted.");
+			log("File is deleted.");
 		} catch (err) {
-			console.error(err);
+			log(JSON.stringify(err));
 		}
 	};
 
 	const setupDlp = async () => {
 		YTDlpWrap.downloadFromGithub(binaryPath).then(() => {
-			console.log("yt-dlp.exe downloaded");
+			log("yt-dlp.exe downloaded");
 		});
 	};
 
@@ -127,6 +128,8 @@ export const setupYtdlp = () => {
 			"Radio",
 			"Monstercat",
 			"Release",
+			"Official Visualizer",
+			"LYRIC VIDEO",
 		];
 
 		for (const regexPattern of regexPatterns) {
@@ -168,7 +171,7 @@ export const setupYtdlp = () => {
 					downloadTracks(csvData);
 				})
 				.catch((error) => {
-					console.error(error);
+					log(JSON.stringify(error))
 				});
 			return;
 		}
@@ -193,6 +196,7 @@ export const setupYtdlp = () => {
 		};
 
 		upsertTrack(track);
+		log("Downloading: " + track.name)
 
 		const ytDlpEventEmitter = ytDlpWrap
 			.exec([
@@ -232,7 +236,8 @@ export const setupYtdlp = () => {
 			.on("error", (error) => {
 				track.completed = true;
 				track.status = "Error";
-				console.error(error);
+				track.msg = JSON.stringify(error)
+				log(JSON.stringify(error))
 				upsertTrack(track);
 			})
 			.on("close", () => {
@@ -257,9 +262,9 @@ export const setupYtdlp = () => {
 						upsertTrack(track);
 					});
 				} catch (e) {
-					console.error(e);
 					track.status = "Warning";
-					track.msg = e as string;
+					track.msg = JSON.stringify(e);
+					log(JSON.stringify(e))
 					upsertTrack(track);
 				}
 			});

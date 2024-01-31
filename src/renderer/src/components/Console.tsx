@@ -1,6 +1,6 @@
 import { Paper } from "@mui/material";
 
-export const makeStyles = () => {
+const makeStyles = () => {
 	return {
 		root: {
 			padding: 2,
@@ -9,18 +9,20 @@ export const makeStyles = () => {
 			fontFamily: "monospace",
 			minHeight: 200,
 			overflow: "auto",
+			marginTop: 2,
+			marginBottom: 2,
 		},
 	};
 };
 
-const Console = ({ output }) => {
+export const Console = ({ output }) => {
 	const classes = makeStyles();
 
 	return (
 		<Paper sx={classes.root}>
-			<pre>{output}</pre>
+			{output.map((line, index) => (
+				<pre key={index}>{line}</pre>
+			))}
 		</Paper>
 	);
 };
-
-export default Console;
