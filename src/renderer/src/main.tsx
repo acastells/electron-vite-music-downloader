@@ -5,8 +5,8 @@ import "@fontsource/roboto/700.css";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import "./assets/index.css";
+import { App } from "./App";
 
 const darkTheme = createTheme({
 	palette: {

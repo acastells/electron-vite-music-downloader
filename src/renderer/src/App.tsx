@@ -6,34 +6,22 @@ import {
 	Grid,
 	InputLabel,
 	MenuItem,
-	Paper,
 	Select,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
 	TextField,
-	Tooltip,
 	Typography,
 } from "@mui/material";
 import React from "react";
-import { Track, TrackStatus, TrackType, TrackTypeObject } from "../../vm";
+import { Track, TrackType, TrackTypeObject } from "../../vm";
 
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import DownloadIcon from "@mui/icons-material/Download";
-import HideSourceIcon from "@mui/icons-material/HideSource";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import ReplayIcon from "@mui/icons-material/Replay";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import WarningIcon from "@mui/icons-material/Warning";
-import LinearProgress from "@mui/material/LinearProgress";
 import { Console } from "./components/Console";
+import { TableTracks } from "./components/TableTracks";
 
-function App(): JSX.Element {
+export const App = () => {
 	const [tracks, setTracks] = React.useState<Track[]>([]);
 	const [newTrack, setNewTrack] = React.useState<{ name: string; type: TrackType }>({
 		name: "",
@@ -45,8 +33,11 @@ function App(): JSX.Element {
 	React.useEffect(() => {
 		window.api.receive("tracks", setTracks);
 		window.api.send("getTracks");
-		window.api.receive("logConsole", (newLog) => setLogConsole([...logConsole, newLog]));
 	}, []);
+
+	React.useEffect(() => {
+		window.api.receive("logConsole", (e) => setLogConsole([...logConsole, e]));
+	}, [logConsole]);
 
 	const handleDownloadTrack = () => {
 		if (!newTrack.name) {
@@ -65,23 +56,6 @@ function App(): JSX.Element {
 			);
 		}
 	}, [newTrack.type]);
-
-	const getStatusColor = (status: TrackStatus) => {
-		switch (status) {
-			case "Warning":
-				return "orange";
-			case "Error":
-				return "red";
-			case "Downloading":
-				return "lightblue";
-			case "Pending":
-				return "lightblue";
-			case "Success":
-				return "green";
-			default:
-				return "white";
-		}
-	};
 
 	return (
 		<Container sx={{ p: 4 }}>
@@ -166,68 +140,7 @@ function App(): JSX.Element {
 				</Grid>
 			</Grid>
 
-			<TableContainer component={Paper}>
-				<Table>
-					<TableHead>
-						<TableRow>
-							<TableCell>Name</TableCell>
-							<TableCell>Type</TableCell>
-							<TableCell>Progress</TableCell>
-							<TableCell>Length</TableCell>
-							<TableCell>Similarity</TableCell>
-							<TableCell>Status</TableCell>
-							<TableCell>Actions</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{tracks.map((track) => (
-							<TableRow key={track.id}>
-								<TableCell>
-									<Tooltip title={track.originalName}>
-										<span>{track.name}</span>
-									</Tooltip>
-								</TableCell>
-								<TableCell>{track.type}</TableCell>
-								<TableCell>
-									<LinearProgress
-										variant="determinate"
-										color={track.completed === true ? "success" : "primary"}
-										value={track.progress}></LinearProgress>
-								</TableCell>
-								<TableCell>{track.length}</TableCell>
-								<TableCell>{track.similarity}</TableCell>
-								<TableCell sx={{ color: getStatusColor(track.status) }}>
-									<Tooltip title={JSON.stringify(track.msg)}>
-										<span>{track.status}</span>
-									</Tooltip>
-								</TableCell>
-								<TableCell>
-									<Button
-										color="success"
-										onClick={() => window.api.send("playTrack", track)}>
-										<PlayArrowIcon />
-									</Button>
-									<Button onClick={() => window.api.send("hideTrack", track)}>
-										<HideSourceIcon />
-									</Button>
-									<Button
-										color="warning"
-										onClick={() => window.api.send("retryTrack", track)}>
-										<ReplayIcon />
-									</Button>
-									<Button
-										color="error"
-										onClick={() => window.api.send("deleteTrack", track)}>
-										<DeleteForeverIcon />
-									</Button>
-								</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</TableContainer>
+			<TableTracks tracks={tracks} />
 		</Container>
 	);
-}
-
-export default App;
+};
