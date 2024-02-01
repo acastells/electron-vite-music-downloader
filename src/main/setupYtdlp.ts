@@ -6,6 +6,7 @@ import { downloadedMusicPath, ytDlpExePath } from "./paths";
 import { upsertTrack } from "./setupDB";
 import { getAudioInfo, readCsvFilePromise } from "./utils";
 import { renameFile } from "./utilsRenameFiles";
+import { stringSimilarity } from "./utilsCoincidenceSystem";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
 
@@ -66,7 +67,7 @@ export const downloadTrack = (_event, listener) => {
 	};
 
 	upsertTrack(track);
-	log("Downloading: " + track.name);
+	
 
 	const ytDlpEventEmitter = ytDlpWrap
 		.exec([
@@ -116,6 +117,13 @@ export const downloadTrack = (_event, listener) => {
 			track.completed = true;
 			track.status = "Success";
 			track.progress = 100;
+			
+			track.similarity = stringSimilarity(track.originalName, track.name);
+			if (track.similarity < 50) {
+				track.status = "Warning";
+				track.msg = "Similarity too low! ";
+			}
+
 			try {
 				const [newName, newPath] = renameFile(path.parse(track.path));
 				track.name = newName;
@@ -140,6 +148,8 @@ export const downloadTrack = (_event, listener) => {
 				upsertTrack(track);
 			}
 		});
+
+		log("Downloading: " + track.name + " with " + ytDlpEventEmitter.ytDlpProcess.pid);
 
 	return ytDlpEventEmitter;
 };

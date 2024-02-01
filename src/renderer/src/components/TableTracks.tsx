@@ -40,6 +40,16 @@ export const TableTracks = (props: Props) => {
 		}
 	};
 
+	const getSimilarityColor = (similarty: number) => {
+		if (similarty > 50) {
+			return "green";
+		} else if (similarty > 25) {
+			return "orange";
+		} else {
+			return "red";
+		}
+	};
+
 	return (
 		<TableContainer component={Paper}>
 			<Table>
@@ -70,7 +80,9 @@ export const TableTracks = (props: Props) => {
 									value={track.progress}></LinearProgress>
 							</TableCell>
 							<TableCell>{track.length}</TableCell>
-							<TableCell>{track.similarity}</TableCell>
+							<TableCell sx={{ color: getSimilarityColor(track.similarity) }}>
+								{track.similarity}
+							</TableCell>
 							<TableCell sx={{ color: getStatusColor(track.status) }}>
 								<Tooltip title={JSON.stringify(track.msg)}>
 									<span>{track.status}</span>
