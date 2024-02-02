@@ -1,8 +1,8 @@
 import { app, ipcMain } from "electron";
-import { Track, TrackTypeObject } from "./../vm";
-import { log } from "./logger";
-import { removeTrack } from "./setupDB";
-import { downloadTrack } from "./setupYtdlp";
+import { Track, TrackTypeObject } from "../../vm";
+import { log } from "../logger";
+import { removeTrack } from "../setupDB";
+import { createEmptyTrack, downloadTrack } from "../setupYtdlp";
 const fs = require("fs");
 const { exec } = require("child_process");
 
@@ -35,7 +35,9 @@ const retryTrack = (_event, track: Track) => {
 	} catch (err) {
 		log(JSON.stringify(err));
 	}
-	downloadTrack(null, { name: track.originalName, type: TrackTypeObject.ByName });
+
+	const newTrack = createEmptyTrack(track.originalName, TrackTypeObject.ByName);
+	downloadTrack(newTrack);
 };
 
 const deleteTrack = (_event, track: Track) => {

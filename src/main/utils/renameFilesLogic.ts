@@ -1,6 +1,6 @@
 import { app, ipcMain } from "electron";
 import path from "path";
-import { getTracks, upsertTrack } from "./setupDB";
+import { getTracks, upsertTrack } from "../setupDB";
 const fs = require("fs");
 
 app.whenReady().then(() => {

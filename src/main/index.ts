@@ -1,11 +1,12 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { BrowserWindow, app, shell } from "electron";
+import { BrowserWindow, app, dialog, ipcMain, shell } from "electron";
 import { join } from "path";
 import icon from "../../resources/icon.png?asset";
+import { log } from "./logger";
+import { setupDB } from "./setupDB";
 import { setupFFmpeg } from "./setupFfmpeg";
 import { setupYtdlp } from "./setupYtdlp";
-import { setupDB } from "./setupDB";
-import { setupUtilsLocalTracks } from "./utilsLocalTracks";
+import { setupUtilsLocalTracks } from "./utils/actionsLocalTracks";
 
 function createWindow(): void {
 	// Create the browser window.
@@ -54,10 +55,10 @@ app.whenReady().then(() => {
 	});
 
 	createWindow();
-	setupDB()
+	setupDB();
 	setupFFmpeg();
 	setupYtdlp();
-	setupUtilsLocalTracks()
+	setupUtilsLocalTracks();
 
 	app.on("activate", function () {
 		// On macOS it's common to re-create a window in the app when the
@@ -74,3 +75,20 @@ app.on("window-all-closed", () => {
 		app.quit();
 	}
 });
+
+app.whenReady().then(() => {
+	ipcMain.on("showOpenDialog", showOpenDialog);
+});
+
+const showOpenDialog = (_event, _listener) => {
+	dialog
+		.showOpenDialog({ properties: ["openFile"] })
+		.then((data) => {
+			const filePathSelected = data.filePaths[0];
+			const mainWindow = BrowserWindow.getAllWindows()[0];
+			mainWindow.webContents.send("showOpenDialog", filePathSelected);
+		})
+		.catch((e) => {
+			log(e);
+		});
+};

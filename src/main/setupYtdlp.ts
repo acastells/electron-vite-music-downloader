@@ -4,9 +4,10 @@ import { Track, TrackStatusObject, TrackType, TrackTypeObject } from "./../vm";
 import { log } from "./logger";
 import { downloadedMusicPath, ytDlpExePath } from "./paths";
 import { upsertTrack } from "./setupDB";
-import { getAudioInfo, readCsvFilePromise } from "./utils";
-import { renameFile } from "./utilsRenameFiles";
-import { stringSimilarity } from "./utilsCoincidenceSystem";
+import { getAudioInfo } from "./utils/getAudioInfo";
+import { renameFile } from "./utils/renameFilesLogic";
+import { stringSimilarity } from "./utils/coincidenceSystemLogic";
+import { readCsvFilePromise } from "./utils/scrapCSV";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
 
@@ -40,7 +41,6 @@ const handleDownloadTrack = (_event, listener) => {
 			});
 	} else {
 		const track = createEmptyTrack(name, type);
-		upsertTrack(track);
 		downloadTrack(track);
 	}
 };
@@ -67,6 +67,8 @@ export const downloadTrack = (track: Track) => {
 	if (track.type !== TrackTypeObject.ByID) {
 		defaultSearch = "ytsearch:";
 	}
+
+	upsertTrack(track);
 
 	const ytDlpEventEmitter = ytDlpWrap
 		.exec([
@@ -153,7 +155,7 @@ export const downloadTrack = (track: Track) => {
 	return ytDlpEventEmitter;
 };
 
-const createEmptyTrack = (name: string, type: TrackType) => {
+export const createEmptyTrack = (name: string, type: TrackType) => {
 	return {
 		id: Date.now().toString() + "_id",
 		name: name,
