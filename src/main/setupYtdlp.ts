@@ -4,9 +4,9 @@ import { Track, TrackStatusObject, TrackType, TrackTypeObject } from "./../vm";
 import { log } from "./logger";
 import { downloadedMusicPath, ytDlpExePath } from "./paths";
 import { upsertTrack } from "./setupDB";
+import { stringSimilarity } from "./utils/coincidenceSystemLogic";
 import { getAudioInfo } from "./utils/getAudioInfo";
 import { renameFile } from "./utils/renameFilesLogic";
-import { stringSimilarity } from "./utils/coincidenceSystemLogic";
 import { readCsvFilePromise } from "./utils/scrapCSV";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
@@ -89,7 +89,13 @@ export const downloadTrack = (track: Track) => {
 			// correct dangerous filenames
 			"--replace-in-metadata",
 			"title",
-			"[^0-9a-zA-Z- а-яА-Я.()[\]]",
+			"[|:]",
+			"",
+
+			// correct dangerous filenames
+			"--replace-in-metadata",
+			"title",
+			"[^0-9a-zA-Z- а-яА-Я.()[]]",
 			"",
 		])
 		.on("progress", (progress) => {
