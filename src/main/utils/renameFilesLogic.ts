@@ -24,10 +24,38 @@ export const renameFile = (pathParsed: path.ParsedPath) => {
 		return pathParsed;
 	};
 
-	if (pathParsed.base.includes("|")) {
-		const filePath = path.join(pathParsed.dir, pathParsed.base);
-		pathParsed = renameFileAux(filePath, "|", "");
-	}
+	const keywords = [
+		"Official",
+		"Oficial",
+		"Music",
+		"Video",
+		"Español",
+		"Lyric",
+		"Audio",
+		"Download",
+		"Visualizer",
+		"Radio",
+		"Monstercat",
+		"Release"
+	];
+
+	const removeParenthesisWithKeywords = (str) => {
+		const regex = new RegExp(`\\([^\\)]*(${keywords.join("|")})[^\\)]*\\)`, "gi");
+		return str.replace(regex, "").trim();
+	};
+	
+	const removeBracketsWithKeywords = (str) => {
+		const regex = new RegExp(`\\[[^\\]]*(${keywords.join("|")})[^\\]]*\\]`, "gi");
+		return str.replace(regex, "").trim();
+	};
+
+	let oldName = pathParsed.base;
+	let newName = removeParenthesisWithKeywords(oldName);
+	fs.renameSync(path.join(pathParsed.dir, oldName), path.join(pathParsed.dir, newName));
+	oldName = newName;
+	newName = removeBracketsWithKeywords(oldName);
+	fs.renameSync(path.join(pathParsed.dir, oldName), path.join(pathParsed.dir, newName));
+	pathParsed = path.parse(path.join(pathParsed.dir, newName));
 
 	if (pathParsed.base.includes(" - NA.mp3")) {
 		const filePath = path.join(pathParsed.dir, pathParsed.base);
@@ -42,42 +70,6 @@ export const renameFile = (pathParsed: path.ParsedPath) => {
 	if (pathParsed.base.includes(" .mp3")) {
 		const filePath = path.join(pathParsed.dir, pathParsed.base);
 		pathParsed = renameFileAux(filePath, " .mp3", ".mp3");
-	}
-
-	const regexPatterns = [/\(([^)]+)\)/, /\[([^)]+)\]/];
-
-	const thingsToRemove = [
-		"Official",
-		"Oficial",
-		"Music",
-		"Video",
-		"Español",
-		"Lyric",
-		"Audio",
-		"Download",
-		"Visualizer",
-		"Radio",
-		"Monstercat",
-		"Release",
-		"Official Visualizer",
-		"LYRIC VIDEO",
-	];
-
-	for (const regexPattern of regexPatterns) {
-		const matches = pathParsed.base.match(regexPattern);
-		if (matches) {
-			for (const match of matches) {
-				for (const thing of thingsToRemove) {
-					if (match.includes(thing)) {
-						const oldFilename = path.join(pathParsed.dir, pathParsed.base);
-						const newFilename = pathParsed.base.replace(match, "");
-						const newFilePath = path.join(pathParsed.dir, newFilename);
-						fs.renameSync(oldFilename, newFilePath);
-						pathParsed = path.parse(newFilePath);
-					}
-				}
-			}
-		}
 	}
 
 	return [pathParsed.base, path.join(pathParsed.dir, pathParsed.base)];
