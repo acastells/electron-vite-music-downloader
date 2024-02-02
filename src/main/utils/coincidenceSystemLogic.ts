@@ -4,8 +4,15 @@ export function stringSimilarity(str1, str2) {
 	const decreaseExtraWords = 0.06;
 
 	// Remove file extension if present
-	const filename1 = str1.replace(/\.[^/.]+$/, "").replace(/[()]/g, "");
-	const filename2 = str2.replace(/\.[^/.]+$/, "").replace(/[\[\]]/g, "");
+	const replaceKeyCharacters = (str) => {
+		const characters = [".mp3", "(", ")", "[", "]"]
+		for (const char of characters){
+			str = str.replaceAll(char, "")
+		} 
+		return str
+	}	
+	const filename1 = replaceKeyCharacters(str1)
+	const filename2 = replaceKeyCharacters(str2)
 
 	// Convert filenames to lowercase and split into individual words
 	const words1 = filename1.toLowerCase().split(" ");

@@ -137,7 +137,7 @@ export const downloadTrack = (track: Track) => {
 				const [newName, newPath] = renameFile(path.parse(track.path));
 				track.name = newName;
 				track.path = newPath;
-				track.similarity = stringSimilarity(track.originalName, track.name);
+				track.similarity = track.type === TrackTypeObject.ByID ? 100 : stringSimilarity(track.originalName, track.name);
 				if (track.similarity < 50) {
 					track.status = "Warning";
 					track.msg = "Similarity too low! ";
