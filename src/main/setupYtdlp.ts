@@ -1,4 +1,4 @@
-import { app, ipcMain } from "electron";
+import { BrowserWindow, app, ipcMain } from "electron";
 import path from "path";
 import { Track, TrackStatusObject, TrackType, TrackTypeObject } from "./../vm";
 import { log } from "./logger";
@@ -11,13 +11,20 @@ import { readCsvFilePromise } from "./utils/scrapCSV";
 import { scrapBeatport } from "./utils/scrapBeatport";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
+const fs = require("fs");
 
 export const setupYtdlp = () => {
 	app.whenReady().then(() => {
 		ipcMain.on("download_dlp", setupDlp);
 		ipcMain.on("download", handleDownloadTrack);
+		ipcMain.on("check_dlp", checkDlp);
 	});
 };
+
+const checkDlp = async () => {
+	const mainWindow = BrowserWindow.getAllWindows()[0];
+	mainWindow.webContents.send("ffmpegSetup", `${ytDlpExePath} ${fs.existsSync(ytDlpExePath)}`);
+}
 
 const setupDlp = async () => {
 	YTDlpWrap.downloadFromGithub(ytDlpExePath)

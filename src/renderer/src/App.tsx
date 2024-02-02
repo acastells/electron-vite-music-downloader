@@ -29,6 +29,9 @@ export const App = () => {
 	});
 	const [showConsole, setShowConsole] = React.useState(false);
 	const [logConsole, setLogConsole] = React.useState<string[]>([]);
+	const log = (str: string) => {
+		setLogConsole([...logConsole, str]);
+	};
 
 	React.useEffect(() => {
 		window.api.receive("tracks", setTracks);
@@ -36,7 +39,12 @@ export const App = () => {
 	}, []);
 
 	React.useEffect(() => {
-		window.api.receive("logConsole", (e) => setLogConsole([...logConsole, e]));
+		window.api.receive("ffmpegSetup", (e) => log(e));
+		window.api.receive("ytdlpSetup", (e) => log(e));
+	}, [logConsole]);
+
+	React.useEffect(() => {
+		window.api.receive("logConsole", (e) => log(e));
 	}, [logConsole]);
 
 	const handleDownloadTrack = () => {
@@ -119,11 +127,15 @@ export const App = () => {
 					justifyContent="center"
 					alignItems={"center"}>
 					<ButtonGroup fullWidth>
+						<Button onClick={() => window.api.send("check_ffmpeg")}>FFMPEG ?</Button>
+						<Button onClick={() => window.api.send("check_dlp")}>DLP ?</Button>
+					</ButtonGroup>
+					<ButtonGroup fullWidth>
 						<Button onClick={() => window.api.send("download_ffmpeg")}>
-							<SystemUpdateIcon /> FFMPEG
+							FFMPEG <SystemUpdateIcon />
 						</Button>
 						<Button onClick={() => window.api.send("download_dlp")}>
-							<SystemUpdateIcon /> DLP
+							DLP <SystemUpdateIcon />
 						</Button>
 					</ButtonGroup>
 					<ButtonGroup fullWidth>
