@@ -1,6 +1,6 @@
 import { app, ipcMain } from "electron";
 import path from "path";
-import { Track, TrackTypeObject } from "./../vm";
+import { Track, TrackStatusObject, TrackType, TrackTypeObject } from "./../vm";
 import { log } from "./logger";
 import { downloadedMusicPath, ytDlpExePath } from "./paths";
 import { upsertTrack } from "./setupDB";
@@ -13,65 +13,64 @@ const async = require("async");
 export const setupYtdlp = () => {
 	app.whenReady().then(() => {
 		ipcMain.on("download_dlp", setupDlp);
-		ipcMain.on("download", downloadTrack);
+		ipcMain.on("download", handleDownloadTrack);
 	});
 };
 
 const setupDlp = async () => {
-	YTDlpWrap.downloadFromGithub(ytDlpExePath).then(() => {
-		log("yt-dlp.exe downloaded");
-	});
-};
-
-const downloadTracks = (tracks: string[]) => {
-	async.eachLimit(tracks, 4, (trackName, callback) => {
-		let processDlp = downloadTrack(null, { name: trackName, type: TrackTypeObject.ByName });
-		processDlp.on("close", () => {
-			callback(); // Notify async that the download is complete
+	YTDlpWrap.downloadFromGithub(ytDlpExePath)
+		.then(() => {
+			log("yt-dlp.exe downloaded");
+		})
+		.catch((e) => {
+			log(e);
 		});
-	});
 };
 
-export const downloadTrack = (_event, listener) => {
-	const ytDlpWrap = new YTDlpWrap(ytDlpExePath);
+const handleDownloadTrack = (_event, listener) => {
+	console.log(listener);
 	const { name, type } = listener;
-
 	if (type === TrackTypeObject.CSV) {
 		readCsvFilePromise(name)
 			.then((csvData: string[]) => {
-				downloadTracks(csvData);
+				downloadMultipleTracks(csvData);
 			})
 			.catch((error) => {
 				log(JSON.stringify(error));
 			});
-		return;
+	} else {
+		const track = createEmptyTrack(name, type);
+		upsertTrack(track);
+		downloadTrack(track);
 	}
+};
+
+const downloadMultipleTracks = (tracksStr: string[]) => {
+	const tracks: Track[] = tracksStr.map((trackName) => {
+		const track = createEmptyTrack(trackName, TrackTypeObject.ByName);
+		upsertTrack(track);
+		return track;
+	});
+
+	async.eachLimit(tracks, 4, (track: Track, _callback) => {
+		let processDlp = downloadTrack(track);
+		processDlp.on("close", () => {
+			_callback(); // Notify async that the download is complete
+		});
+	});
+};
+
+export const downloadTrack = (track: Track) => {
+	const ytDlpWrap = new YTDlpWrap(ytDlpExePath);
 
 	let defaultSearch = "";
-	if (type !== TrackTypeObject.ByID) {
+	if (track.type !== TrackTypeObject.ByID) {
 		defaultSearch = "ytsearch:";
 	}
 
-	const track: Track = {
-		id: Date.now().toString() + "_id",
-		name: name,
-		originalName: name,
-		path: path.join(downloadedMusicPath, name, ".mp3"),
-		type: type,
-		length: 0,
-		progress: 0,
-		similarity: null,
-		completed: false,
-		status: "Pending",
-		msg: "",
-	};
-
-	upsertTrack(track);
-	
-
 	const ytDlpEventEmitter = ytDlpWrap
 		.exec([
-			name,
+			track.name,
 			"-o",
 			"%(title)s - %(artist)s",
 			"-P",
@@ -117,7 +116,7 @@ export const downloadTrack = (_event, listener) => {
 			track.completed = true;
 			track.status = "Success";
 			track.progress = 100;
-			
+
 			track.similarity = stringSimilarity(track.originalName, track.name);
 			if (track.similarity < 50) {
 				track.status = "Warning";
@@ -149,7 +148,23 @@ export const downloadTrack = (_event, listener) => {
 			}
 		});
 
-		log("Downloading: " + track.name + " with " + ytDlpEventEmitter.ytDlpProcess.pid);
+	log("Downloading: " + track.name + " with " + ytDlpEventEmitter.ytDlpProcess.pid);
 
 	return ytDlpEventEmitter;
+};
+
+const createEmptyTrack = (name: string, type: TrackType) => {
+	return {
+		id: Date.now().toString() + "_id",
+		name: name,
+		originalName: name,
+		path: path.join(downloadedMusicPath, name + ".mp3"),
+		type: type,
+		length: 0,
+		progress: 0,
+		similarity: null,
+		completed: false,
+		status: TrackStatusObject.Pending,
+		msg: "",
+	};
 };

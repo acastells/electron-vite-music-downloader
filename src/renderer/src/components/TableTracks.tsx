@@ -56,7 +56,6 @@ export const TableTracks = (props: Props) => {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
-						<TableCell>Type</TableCell>
 						<TableCell>Progress</TableCell>
 						<TableCell>Length</TableCell>
 						<TableCell>Similarity</TableCell>
@@ -72,7 +71,6 @@ export const TableTracks = (props: Props) => {
 									<span>{track.name}</span>
 								</Tooltip>
 							</TableCell>
-							<TableCell>{track.type}</TableCell>
 							<TableCell>
 								<LinearProgress
 									variant="determinate"
