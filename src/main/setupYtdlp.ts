@@ -88,8 +88,8 @@ export const downloadTrack = (track: Track) => {
 
 			// correct dangerous filenames
 			"--replace-in-metadata",
-			"title,channel,playlist",
-			"[^0-9a-zA-Z- а-яА-Я.]",
+			"title",
+			"[^0-9a-zA-Z- а-яА-Я.()[\]]",
 			"",
 		])
 		.on("progress", (progress) => {
@@ -119,17 +119,17 @@ export const downloadTrack = (track: Track) => {
 			track.status = "Success";
 			track.progress = 100;
 
-			track.similarity = stringSimilarity(track.originalName, track.name);
-			if (track.similarity < 50) {
-				track.status = "Warning";
-				track.msg = "Similarity too low! ";
-			}
-
 			try {
 				const [newName, newPath] = renameFile(path.parse(track.path));
 				track.name = newName;
 				track.path = newPath;
+				track.similarity = stringSimilarity(track.originalName, track.name);
+				if (track.similarity < 50) {
+					track.status = "Warning";
+					track.msg = "Similarity too low! ";
+				}
 				upsertTrack(track);
+
 				getAudioInfo(track.path).then(({ duration, bitrate }) => {
 					track.length = duration;
 					if (bitrate < 320000) {
