@@ -8,6 +8,7 @@ import { stringSimilarity } from "./utils/coincidenceSystemLogic";
 import { getAudioInfo } from "./utils/getAudioInfo";
 import { renameFile } from "./utils/renameFilesLogic";
 import { readCsvFilePromise } from "./utils/scrapCSV";
+import { scrapBeatport } from "./utils/scrapBeatport";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
 
@@ -29,12 +30,19 @@ const setupDlp = async () => {
 };
 
 const handleDownloadTrack = (_event, listener) => {
-	console.log(listener);
 	const { name, type } = listener;
 	if (type === TrackTypeObject.CSV) {
 		readCsvFilePromise(name)
 			.then((csvData: string[]) => {
 				downloadMultipleTracks(csvData);
+			})
+			.catch((error) => {
+				log(JSON.stringify(error));
+			});
+	} else if (type === TrackTypeObject.BeatportTopURL) {
+		scrapBeatport(name)
+			.then((tracks: string[]) => {
+				downloadMultipleTracks(tracks);
 			})
 			.catch((error) => {
 				log(JSON.stringify(error));

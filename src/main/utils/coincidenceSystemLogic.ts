@@ -25,7 +25,6 @@ export function stringSimilarity(str1, str2) {
 			set2.size * setSizePercentage -
 			intersection.size * intersectionPercentage);
 
-	console.log(set1, set2);
 	// Calculate the extra words in each filename
 	const extraWords1 = set1.size - intersection.size;
 	const extraWords2 = set2.size - intersection.size;
