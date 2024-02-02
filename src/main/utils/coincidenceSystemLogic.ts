@@ -1,75 +1,43 @@
-export const stringSimilarity = (str1: string, str2: string): number => {
-    str1 = str1.toLowerCase();
-    str2 = str2.toLowerCase();
+export function stringSimilarity(str1, str2) {
+	const intersectionPercentage = 0.8;
+	const setSizePercentage = 0.7;
+	const decreaseExtraWords = 0.06;
 
-    // Split and sort the strings into individual words
-    const words1: string[] = str1.match(/\w+/g)?.sort() || [];
-    const words2: string[] = str2.match(/\w+/g)?.sort() || [];
+	// Remove file extension if present
+	const filename1 = str1.replace(/\.[^/.]+$/, "");
+	const filename2 = str2.replace(/\.[^/.]+$/, "");
 
-    // Calculate the number of common words using Counter
-    const counter1: Map<string, number> = countWords(words1);
-    const counter2: Map<string, number> = countWords(words2);
-    const commonWords: Set<string> = new Set([...counter1.keys()].filter(word => counter2.has(word)));
+	// Convert filenames to lowercase and split into individual words
+	const words1 = filename1.toLowerCase().split(" ");
+	const words2 = filename2.toLowerCase().split(" ");
 
-    // Calculate the total number of words
-    const totalWords: number = Math.max(words1.length, words2.length);
+	// Create sets of unique words
+	const set1 = new Set(words1.filter((word) => /^[a-z0-9\(\)\[\]]+$/i.test(word)));
+	const set2 = new Set(words2.filter((word) => /^[a-z0-9\(\)\[\]]+$/i.test(word)));
 
-    // Calculate the similarity score
-    let similarity: number = 0;
-    if (totalWords === 0) {
-        similarity = 0;
-    } else {
-        similarity = commonWords.size / totalWords;
-    }
+	// Calculate the intersection of the two sets
+	const intersection = new Set([...set1].filter((word) => set2.has(word)));
 
-    commonWords.forEach(word => {
-        while (words1.includes(word)) {
-            words1.splice(words1.indexOf(word), 1);
-        }
-        while (words2.includes(word)) {
-            words2.splice(words2.indexOf(word), 1);
-        }
-    });
+	// Calculate the Jaccard similarity coefficient
+	const similarity =
+		(intersection.size * intersectionPercentage) /
+		(set1.size * setSizePercentage +
+			set2.size * setSizePercentage -
+			intersection.size * intersectionPercentage);
 
-    while (true) {
-        if (words1.length === 0 && words2.length === 0) {
-            break;
-        }
-        if (words1.length === 0 || words2.length === 0) {
-            // Penalize the similarity score if one string has more words than the other
-            similarity *= 0.8; // For example, decrease the score by 20%
-            break;
-        } else {
-            const auxScore: number = similarityBySimpleMatcher(words1[0], words2[0]);
-            similarity += auxScore * (1 - (commonWords.size / totalWords));
-            words1.shift();
-            words2.shift();
-        }
-    }
+	console.log(set1, set2);
+	// Calculate the extra words in each filename
+	const extraWords1 = set1.size - intersection.size;
+	const extraWords2 = set2.size - intersection.size;
 
-    // Convert the similarity score to a percentage, maximum is 100
-    const similarityPercentage: number = Math.min(Math.round(similarity * 100), 100);
+	// Decrease similarity based on the extra words
+	const similarityWithExtraWords = similarity - (extraWords1 + extraWords2) * decreaseExtraWords;
 
-    return similarityPercentage;
-}
+	// Convert similarity to a percentage
+	const similarityPercentage = similarityWithExtraWords * 100;
 
-function countWords(words: string[]): Map<string, number> {
-    const counter: Map<string, number> = new Map();
-    for (const word of words) {
-        counter.set(word, (counter.get(word) || 0) + 1);
-    }
-    return counter;
-}
+	// Round the similarity percentage to two decimal places
+	const roundedSimilarity = Math.min(Math.round(similarityPercentage * 100) / 100, 100);
 
-function similarityBySimpleMatcher(word1: string, word2: string): number {
-    const minLength = Math.min(word1.length, word2.length);
-    let matchCount = 0;
-    for (let i = 0; i < minLength; i++) {
-        if (word1[i] === word2[i]) {
-            matchCount++;
-        } else {
-            break;
-        }
-    }
-    return matchCount / minLength;
+	return roundedSimilarity;
 }
