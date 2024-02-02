@@ -60,7 +60,7 @@ const downloadMultipleTracks = (tracksStr: string[]) => {
 		return track;
 	});
 
-	async.eachLimit(tracks, 4, (track: Track, _callback) => {
+	async.eachLimit(tracks, 2, (track: Track, _callback) => {
 		let processDlp = downloadTrack(track);
 		processDlp.on("close", () => {
 			_callback(); // Notify async that the download is complete
