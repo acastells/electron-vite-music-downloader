@@ -4,26 +4,28 @@ export function stringSimilarity(str1, str2) {
 	const decreaseExtraWords = 0.06;
 
 	// Remove file extension if present
-	const filename1 = str1.replace(/\.[^/.]+$/, "");
-	const filename2 = str2.replace(/\.[^/.]+$/, "");
+	const filename1 = str1.replace(/\.[^/.]+$/, "").replace(/[()]/g, "");
+	const filename2 = str2.replace(/\.[^/.]+$/, "").replace(/[\[\]]/g, "");
 
 	// Convert filenames to lowercase and split into individual words
 	const words1 = filename1.toLowerCase().split(" ");
 	const words2 = filename2.toLowerCase().split(" ");
 
 	// Create sets of unique words
-	const set1 = new Set(words1.filter((word) => /^[a-z0-9\(\)\[\]]+$/i.test(word)));
-	const set2 = new Set(words2.filter((word) => /^[a-z0-9\(\)\[\]]+$/i.test(word)));
+	const set1 = new Set(words1.filter((word) => /^[a-z0-9\(\)\[\]']+$/i.test(word)));
+	const set2 = new Set(words2.filter((word) => /^[a-z0-9\(\)\[\]']+$/i.test(word)));
 
 	// Calculate the intersection of the two sets
 	const intersection = new Set([...set1].filter((word) => set2.has(word)));
 
 	// Calculate the Jaccard similarity coefficient
-	const similarity =
+	let similarity =
 		(intersection.size * intersectionPercentage) /
 		(set1.size * setSizePercentage +
 			set2.size * setSizePercentage -
 			intersection.size * intersectionPercentage);
+
+	similarity = Math.min(similarity, 1);
 
 	// Calculate the extra words in each filename
 	const extraWords1 = set1.size - intersection.size;
