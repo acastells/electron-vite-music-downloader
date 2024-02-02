@@ -80,8 +80,8 @@ export const TableTracks = (props: Props) => {
 									value={track.progress}></LinearProgress>
 							</TableCell>
 							<TableCell>{track.length}</TableCell>
-							<TableCell sx={{ color: getSimilarityColor(track.similarity) }}>
-								{track.similarity}
+							<TableCell sx={{ color: getSimilarityColor(track.similarity || 0) }}>
+								{track.similarity || ""}
 							</TableCell>
 							<TableCell sx={{ color: getStatusColor(track.status) }}>
 								<Tooltip title={JSON.stringify(track.msg)}>

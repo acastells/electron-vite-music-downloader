@@ -60,7 +60,7 @@ export const downloadTrack = (_event, listener) => {
 		type: type,
 		length: 0,
 		progress: 0,
-		similarity: 0,
+		similarity: null,
 		completed: false,
 		status: "Pending",
 		msg: "",

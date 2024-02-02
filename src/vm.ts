@@ -25,7 +25,7 @@ export interface Track {
 	type: TrackType;
 	length: number;
 	progress: number;
-	similarity: number;
+	similarity: number | null;
 	completed: boolean;
 	status: TrackStatus;
 	msg: string;
