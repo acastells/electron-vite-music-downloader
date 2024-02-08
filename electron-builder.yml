@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: electron-vite-music-downloader
+productName: music-downloader
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: electron-vite-music-downloader
+  executableName: music-downloader
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
