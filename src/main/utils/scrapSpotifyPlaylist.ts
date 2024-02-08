@@ -1,3 +1,5 @@
+import { log } from "../logger";
+
 const SpotifyWebApi = require("spotify-web-api-node");
 const SPOTIFY_CLIENT_ID = "5098747bf7da4a368bb91bc3b9124501";
 const SPOTIFY_CLIENT_SECRET = "c974a47f41a74811a8e61c2d6d45a95d";
@@ -9,7 +11,7 @@ const spotifyApi = new SpotifyWebApi({
 async function loginSpotify() {
 	// Retrieve an access token.
 	const data = await spotifyApi.clientCredentialsGrant().catch((err) => {
-		console.log(`Something went wrong when retrieving an access token ${err}`);
+		log(`Something went wrong when retrieving an access token ${err}`);
 		throw `Something went wrong when retrieving an access token ${err}`;
 	});
 
@@ -18,6 +20,8 @@ async function loginSpotify() {
 }
 
 export async function scrapSpotifyPlaylist(url: string) {
+	const playlistId = extractPlaylistId(url);
+
 	await loginSpotify();
 
 	let offset = 0;
@@ -27,10 +31,10 @@ export async function scrapSpotifyPlaylist(url: string) {
 
 	do {
 		const response = await spotifyApi
-			.getPlaylistTracks(url, { offset, limit, fields: "items" })
+			.getPlaylistTracks(playlistId, { offset, limit, fields: "items" })
 			.catch((err) => {
-				console.log("Something went wrong when retrieving the tracks", err);
-				return []; // Return an empty array if playlist retrieval fails
+				log(`Something went wrong when retrieving the tracks ${err}`);
+				return [];
 			});
 
 		const items = response.body.items;
@@ -43,8 +47,16 @@ export async function scrapSpotifyPlaylist(url: string) {
 
 		totalItems = tracks.length;
 		offset += limit;
-		console.log(offset, totalItems);
 	} while (offset <= totalItems);
 
 	return tracks;
+}
+
+function extractPlaylistId(url: string): string {
+	const regex = /playlist\/([\w\d]+)/;
+	const match = url.match(regex);
+	if (match) {
+		return match[1];
+	}
+	return url;
 }
