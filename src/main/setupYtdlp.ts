@@ -9,6 +9,7 @@ import { getAudioInfo } from "./utils/getAudioInfo";
 import { renameFile } from "./utils/renameFilesLogic";
 import { readCsvFilePromise } from "./utils/scrapCSV";
 import { scrapBeatport } from "./utils/scrapBeatport";
+import { scrapSpotifyPlaylist } from "./utils/scrapSpotifyPlaylist";
 const YTDlpWrap = require("yt-dlp-wrap").default; // TS version does not work // https://github.com/foxesdocode/yt-dlp-wrap
 const async = require("async");
 const fs = require("fs");
@@ -24,7 +25,7 @@ export const setupYtdlp = () => {
 const checkDlp = async () => {
 	const mainWindow = BrowserWindow.getAllWindows()[0];
 	mainWindow.webContents.send("ffmpegSetup", `${ytDlpExePath} ${fs.existsSync(ytDlpExePath)}`);
-}
+};
 
 const setupDlp = async () => {
 	YTDlpWrap.downloadFromGithub(ytDlpExePath)
@@ -54,6 +55,14 @@ const handleDownloadTrack = (_event, listener) => {
 			.catch((error) => {
 				log(JSON.stringify(error));
 			});
+	} else if (type === TrackTypeObject.SpotifyPlaylistURL) {
+		scrapSpotifyPlaylist(name)
+			.then((tracks: string[]) => {
+				downloadMultipleTracks(tracks);
+			})
+			.catch((error) => {
+				log(JSON.stringify(error));
+			});
 	} else {
 		const track = createEmptyTrack(name, type);
 		downloadTrack(track);
@@ -70,7 +79,7 @@ const downloadMultipleTracks = (tracksStr: string[]) => {
 	async.eachLimit(tracks, 2, (track: Track, _callback) => {
 		let processDlp = downloadTrack(track);
 		processDlp.on("close", () => {
-			processDlp.removeAllListeners()
+			processDlp.removeAllListeners();
 			_callback(); // Notify async that the download is complete
 		});
 	});
@@ -145,7 +154,10 @@ export const downloadTrack = (track: Track) => {
 				const [newName, newPath] = renameFile(path.parse(track.path));
 				track.name = newName;
 				track.path = newPath;
-				track.similarity = track.type === TrackTypeObject.ByID ? 100 : stringSimilarity(track.originalName, track.name);
+				track.similarity =
+					track.type === TrackTypeObject.ByID
+						? 100
+						: stringSimilarity(track.originalName, track.name);
 				if (track.similarity < 50) {
 					track.status = "Warning";
 					track.msg = "Similarity too low! ";
@@ -192,3 +204,4 @@ export const createEmptyTrack = (name: string, type: TrackType) => {
 		msg: "",
 	};
 };
+
