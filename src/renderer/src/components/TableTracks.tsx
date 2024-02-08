@@ -14,6 +14,7 @@ import {
 	TableRow,
 	Tooltip,
 } from "@mui/material";
+import { transformAudioLengthToMinutes } from "@renderer/utils";
 import { TrackStatus, Track } from "src/vm";
 
 interface Props {
@@ -77,7 +78,7 @@ export const TableTracks = (props: Props) => {
 									color={track.completed === true ? "success" : "primary"}
 									value={track.progress}></LinearProgress>
 							</TableCell>
-							<TableCell>{track.length}</TableCell>
+							<TableCell>{transformAudioLengthToMinutes(track.length)}</TableCell>
 							<TableCell sx={{ color: getSimilarityColor(track.similarity || 0) }}>
 								{track.similarity || ""}
 							</TableCell>
