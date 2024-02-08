@@ -1,7 +1,8 @@
 {
   "name": "c4sti-music-downloader",
   "version": "1.0.0",
-  "description": "C4STI's music downloader for you",
+  "author": "C4STI",
+  "description": "The music downloader for you",
   "main": "./out/main/index.js",
   "scripts": {
     "format": "prettier --write .",
